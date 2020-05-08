@@ -9,22 +9,23 @@
     (is (true? (nand true false)))
     (is (false? (nand true true)))))
 
-(deftest make-flipflop-test
-  (testing "flipflop"
-    (is (false? (let [ff (make-flipflop)]
-                  (ff false))))
-    (is (false? (let [ff (make-flipflop)]
-                  (ff true)))))
+(deftest make-register-test
+  (testing "default value"
+    (is (false? (let [r (make-register)]
+                  (r false false))))
+    (is (false? (let [r (make-register)]
+                  (r true false))))
+    )
   (testing "remembering"
-    (is (false? (let [ff (make-flipflop)]
-                  (ff false)
-                  (ff false))))
-    (is (false? (let [ff (make-flipflop)]
-                  (ff false)
-                  (ff true))))
-    (is (true? (let [ff (make-flipflop)]
-                 (ff true)
-                 (ff false))))
-    (is (true? (let [ff (make-flipflop)]
-                 (ff true)
-                 (ff true))))))
+    (is (false? (let [r (make-register)]
+                 (r false true)
+                 (r false false))))
+    (is (false? (let [r (make-register)]
+                  (r false true)
+                  (r true false))))
+    (is (true? (let [r (make-register)]
+                 (r true true)
+                 (r false true))))
+    (is (true? (let [r (make-register)]
+                  (r true true)
+                  (r true true))))))

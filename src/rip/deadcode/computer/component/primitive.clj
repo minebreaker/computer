@@ -5,10 +5,20 @@
 (defn nand [x y]
   (not (and x y)))
 
-(defn make-flipflop []
+;(defn make-flipflop []
+;  (let [r (ref false)]
+;    (fn [in]
+;      (let [current @r]
+;        (dosync
+;          (ref-set r in)
+;          current)))))
+
+(defn make-register []
   (let [r (ref false)]
-    (fn [in]
+    (fn [in load]
       (let [current @r]
-        (dosync
-          (ref-set r in)
+        (if load
+          (dosync
+            (ref-set r in)
+            current)
           current)))))

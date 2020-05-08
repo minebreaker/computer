@@ -66,10 +66,10 @@
 
         [radd] (adder16 x-negate y-negate false)
         rand (and16-16 x-negate y-negate)
-        out-temp (mux16-16 rand radd f)
+        out-temp (mux16 rand radd f)
         out (xor16-16 out-temp (expand16 no))
         zr (not (or16-1 out))
-        ng (nth out 15)]
+        ng (nth out 15)]                                    ; it's ok to use nth as long as the index is a constant
 
     ;(println "========")
     ;(println x-negate)

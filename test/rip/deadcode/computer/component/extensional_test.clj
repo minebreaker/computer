@@ -1,4 +1,4 @@
-(ns rip.deadcode.computer.component.extensional_test
+(ns rip.deadcode.computer.component.extensional-test
   (:require [clojure.test :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]))
 

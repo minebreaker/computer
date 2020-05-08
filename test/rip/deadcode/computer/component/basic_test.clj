@@ -1,7 +1,7 @@
 (ns rip.deadcode.computer.component.basic-test
   (:require [clojure.test :refer :all]
             [rip.deadcode.computer.component.basic :refer :all]
-            [rip.deadcode.computer.component.extensional :refer [i2ba zero16 m-one16]]))
+            [rip.deadcode.computer.component.extensional :refer :all]))
 
 (deftest not-test
   (testing "not"
@@ -67,7 +67,7 @@
     (is (= (xor16-16 m-one16 m-one16) zero16))))
 
 (deftest mux-test
-  (testing "multiplexer"
+  (testing "mux"
     (is (false? (mux false false false)))
     (is (true? (mux true false false)))
     (is (false? (mux false true false)))
@@ -77,20 +77,65 @@
     (is (true? (mux false true true)))
     (is (true? (mux true true true)))))
 
-(deftest mux16-16-test
-  (testing "mux16-16"
-    (is (= (mux16-16 zero16 zero16 false) zero16))
-    (is (= (mux16-16 m-one16 zero16 false) m-one16))
-    (is (= (mux16-16 zero16 m-one16 false) zero16))
-    (is (= (mux16-16 m-one16 m-one16 false) m-one16))
-    (is (= (mux16-16 zero16 zero16 true) zero16))
-    (is (= (mux16-16 m-one16 zero16 true) zero16))
-    (is (= (mux16-16 zero16 m-one16 true) m-one16))
-    (is (= (mux16-16 m-one16 m-one16 true) m-one16))))
+(deftest mux16-test
+  (testing "mux16"
+    (is (= (mux16 zero16 zero16 false) zero16))
+    (is (= (mux16 m-one16 zero16 false) m-one16))
+    (is (= (mux16 zero16 m-one16 false) zero16))
+    (is (= (mux16 m-one16 m-one16 false) m-one16))
+    (is (= (mux16 zero16 zero16 true) zero16))
+    (is (= (mux16 m-one16 zero16 true) zero16))
+    (is (= (mux16 zero16 m-one16 true) m-one16))
+    (is (= (mux16 m-one16 m-one16 true) m-one16))))
+
+(deftest mux8-test
+  (testing "mux8"
+    (is (false? (mux8 false false false false false false false false [false false false])))
+    (is (true? (mux8 true false false false false false false false [false false false])))
+    (is (true? (mux8 false true false false false false false false [true false false])))
+    (is (true? (mux8 true false true false false false false false [false true false])))
+    (is (true? (mux8 true false false true false false false false [true true false])))
+    (is (true? (mux8 true false false false true false false false [false false true])))
+    (is (true? (mux8 true false false false false true false false [true false true])))
+    (is (true? (mux8 true false false false false false true false [false true true])))
+    (is (true? (mux8 true false false false false false false true [true true true])))))
+
+(deftest mux16-8-test
+  (testing "mux16-8"
+    (is (= (mux16-8 false16 false16 false16 false16 false16 false16 false16 false16 [false false false]) false16))
+    (is (= (mux16-8 true16 false16 false16 false16 false16 false16 false16 false16 [false false false]) true16))
+    (is (= (mux16-8 false16 true16 false16 false16 false16 false16 false16 false16 [true false false]) true16))
+    (is (= (mux16-8 false16 false16 true16 false16 false16 false16 false16 false16 [false true false]) true16))
+    (is (= (mux16-8 false16 false16 false16 true16 false16 false16 false16 false16 [true true false]) true16))
+    (is (= (mux16-8 false16 false16 false16 false16 true16 false16 false16 false16 [false false true]) true16))
+    (is (= (mux16-8 false16 false16 false16 false16 false16 true16 false16 false16 [true false true]) true16))
+    (is (= (mux16-8 false16 false16 false16 false16 false16 false16 true16 false16 [false true true]) true16))
+    (is (= (mux16-8 false16 false16 false16 false16 false16 false16 false16 true16 [true true true]) true16))))
 
 (deftest dmux-test
-  (testing "demultiplexer"
+  (testing "dmux"
     (is (= (dmux false false) [false false]))
     (is (= (dmux true false) [true false]))
     (is (= (dmux false true) [false false]))
     (is (= (dmux true true) [false true]))))
+
+(deftest dmux8-test
+  (testing "dmux8"
+    (is (= (dmux8 false [false false false])
+          [false false false false false false false false]))
+    (is (= (dmux8 true [false false false])
+          [true false false false false false false false]))
+    (is (= (dmux8 true [true false false])
+          [false true false false false false false false]))
+    (is (= (dmux8 true [false true false])
+          [false false true false false false false false]))
+    (is (= (dmux8 true [true true false])
+          [false false false true false false false false]))
+    (is (= (dmux8 true [false false true])
+          [false false false false true false false false]))
+    (is (= (dmux8 true [true false true])
+          [false false false false false true false false]))
+    (is (= (dmux8 true [false true true])
+          [false false false false false false true false]))
+    (is (= (dmux8 true [true true true])
+          [false false false false false false false true]))))
