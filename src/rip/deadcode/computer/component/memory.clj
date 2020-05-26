@@ -1,7 +1,8 @@
 (ns rip.deadcode.computer.component.memory
   (:require [rip.deadcode.computer.component.primitive :refer :all]
             [rip.deadcode.computer.component.basic :refer :all]
-            [rip.deadcode.computer.component.extensional :refer :all]))
+            [rip.deadcode.computer.component.extensional :refer :all]
+            [rip.deadcode.computer.component.alu :refer :all]))
 
 (defn make-register16 []
   (let [r0 (make-register) r1 (make-register) r2 (make-register) r3 (make-register)
@@ -95,3 +96,19 @@
             ro2 (r2 in addr-16k l2)
             ro3 (r3 in addr-16k l3)]
         (mux16-4 ro0 ro1 ro2 ro3 addr)))))
+
+(defn print-debug [value]
+  (do (println value) value))
+
+(defn make-pc []
+  "program counter"
+  (let [r (make-register16)]
+    (fn [in inc load reset]
+      (r
+        (mux16-4
+          zero16
+          zero16
+          in
+          (inc16 (r false16 false))
+          [(or inc (not load)) (not reset)])
+        (or (or load inc) reset)))))

@@ -57,3 +57,40 @@
              (r true16 [true false false] true)
              (r false16 [true false false] false))
           true16))))
+
+(deftest make-pc-test
+  (testing "load"
+    (is (= (let [pc (make-pc)]
+             (pc true16 false true false)
+             (pc false16 false true false))
+          true16))
+    (is (= (let [pc (make-pc)]
+             (pc true16 false true false)
+             (pc one16 false true false)
+             (pc true16 false true false))
+          one16)))
+  (testing "increment"
+    (is (= (let [pc (make-pc)]
+             (pc zero16 true false false))
+          zero16))
+    (is (= (let [pc (make-pc)]
+             (pc zero16 true false false)
+             (pc zero16 true false false))
+          one16))
+    (is (= (let [pc (make-pc)]
+             (pc zero16 true false false)
+             (pc zero16 true false false)
+             (pc zero16 true false false))
+          (i2ba 2))))
+  (testing "reset"
+    (is (= (let [pc (make-pc)]
+             (pc true16 false true false)
+             (pc true16 false false true)
+             (pc true16 false true false))
+          zero16)))
+  (testing "unchanged"
+    (is (= (let [pc (make-pc)]
+             (pc true16 false true false)
+             (pc false16 false false false)
+             (pc false16 false false false))
+          true16))))
