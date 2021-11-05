@@ -18,8 +18,8 @@
     )
   (testing "remembering"
     (is (false? (let [r (make-register)]
-                 (r false true)
-                 (r false false))))
+                  (r false true)
+                  (r false false))))
     (is (false? (let [r (make-register)]
                   (r false true)
                   (r true false))))
@@ -27,5 +27,5 @@
                  (r true true)
                  (r false true))))
     (is (true? (let [r (make-register)]
-                  (r true true)
-                  (r true true))))))
+                 (r true true)
+                 (r true true))))))

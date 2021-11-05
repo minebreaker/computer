@@ -2,4 +2,4 @@
   :description "computer"
   :license {:name "MIT"}
   :main rip.deadcode.computer.core
-  :dependencies [[org.clojure/clojure "1.10.0"]])
+  :dependencies [[org.clojure/clojure "1.10.3"]])
