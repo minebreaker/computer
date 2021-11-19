@@ -84,8 +84,7 @@
         (mux16-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
 
 (defn make-ram16k []
-  (let [r0 (make-ram4k) r1 (make-ram4k) r2 (make-ram4k) r3 (make-ram4k)
-        r4 (make-ram4k) r5 (make-ram4k) r6 (make-ram4k) r7 (make-ram4k)]
+  (let [r0 (make-ram4k) r1 (make-ram4k) r2 (make-ram4k) r3 (make-ram4k)]
     (fn [in addr load]
       (let [[a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13] addr
             addr-this [a0 a1]
