@@ -17,6 +17,9 @@
 (def true16 (vec (repeat 16 true)))
 (def m-one16 true16)
 (def one16 (assoc zero16 0 true))
+(def two16 (assoc zero16 1 true))
+(def three16 (assoc two16 0 true))
+(def one16 (assoc zero16 0 true))
 (def max16 (assoc true16 15 false))
 (def min16 (assoc false16 15 true))
 

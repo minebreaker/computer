@@ -27,6 +27,8 @@
 (defn or [x y]
   (nand (not x) (not y)))
 
+(defn or3 [x y z] (or x (or y z)))
+
 (defn or16-16 [x y]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y]

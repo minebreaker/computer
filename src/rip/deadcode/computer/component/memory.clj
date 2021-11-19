@@ -97,9 +97,6 @@
             ro3 (r3 in addr-16k l3)]
         (mux16-4 ro0 ro1 ro2 ro3 addr)))))
 
-(defn print-debug [value]
-  (do (println value) value))
-
 (defn make-pc []
   "program counter"
   (let [r (make-register16)]
