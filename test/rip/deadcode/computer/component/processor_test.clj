@@ -3,21 +3,6 @@
             [rip.deadcode.computer.component.extensional :refer :all]
             [rip.deadcode.computer.component.processor :refer :all]))
 
-(defn a-inst [bits] (into [false] bits))
-(defn c-inst [a comp dest jump]
-  (->
-    [true]
-    (into [true true])
-    (into [a])
-    (into comp)
-    (into dest)
-    (into jump)))
-(defn bit15 [in] (subvec in 0 15))
-(def zero15 (bit15 zero16))
-(def one15 (bit15 one16))
-(def two15 (bit15 two16))
-(def three15 (bit15 three16))
-
 (deftest cpu-test-a-instruction
   (testing "a-instruction"
     (let [

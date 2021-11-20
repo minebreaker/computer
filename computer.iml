@@ -16,6 +16,7 @@
     <orderEntry type="library" name="Leiningen: clojure-complete:0.2.5" level="project" />
     <orderEntry type="library" name="Leiningen: nrepl:0.6.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/clojure:1.10.3" level="project" />
+    <orderEntry type="library" name="Leiningen: org.clojure/core.match:1.0.0" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/core.specs.alpha:0.2.56" level="project" />
     <orderEntry type="library" name="Leiningen: org.clojure/spec.alpha:0.2.194" level="project" />
   </component>

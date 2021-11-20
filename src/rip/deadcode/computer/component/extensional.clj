@@ -34,3 +34,22 @@
 (defn expand16 [in]
   "Expands 1bit input to 16bit"
   [in in in in in in in in in in in in in in in in])
+
+(defn bit15 [in] (subvec in 0 15))
+(def zero15 (bit15 zero16))
+(def one15 (bit15 one16))
+(def two15 (bit15 two16))
+(def three15 (bit15 three16))
+
+(defn a-inst [bits]
+  "Creates a-instruction from bool array[15]"
+  (into [false] bits))
+(defn c-inst [a comp dest jump]
+  "Creates c-instruction from a-code, comp[6] dest[3] jump[3]"
+  (->
+    [true]
+    (into [true true])
+    (into [a])
+    (into comp)
+    (into dest)
+    (into jump)))
