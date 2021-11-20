@@ -1,7 +1,8 @@
 (ns rip.deadcode.computer.component.processor-test
   (:require [clojure.test :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]
-            [rip.deadcode.computer.component.processor :refer :all]))
+            [rip.deadcode.computer.component.processor :refer :all]
+            [rip.deadcode.computer.component.opcode :refer :all]))
 
 (deftest cpu-test-a-instruction
   (testing "a-instruction"
@@ -30,11 +31,11 @@
     (let [
           cpu (make-cpu)
           _ (cpu (a-inst one15) false16 false)              ; @1
-          _ (cpu (c-inst false [true true false false false false] [false true false] [false false false]) false16 false) ; D=A
+          _ (cpu (c-inst false op-a op-dest-d op-no-jump) false16 false) ; D=A
           _ (cpu (a-inst two15) false16 false)              ; @2
-          [outM1] (cpu (c-inst false [false false false false true false] [false true false] [false false false]) false16 false) ; D=D+A
-          [outM2] (cpu (c-inst false [false false true true true false] [false true false] [false false false]) false16 false) ; D=D-1
-          [outM3] (cpu (c-inst false [true true true false true false] [false true false] [false false false]) false16 false) ; D=-1
+          [outM1] (cpu (c-inst false op-d+a op-dest-d op-no-jump) false16 false) ; D=D+A
+          [outM2] (cpu (c-inst false op-d-1 op-dest-d op-no-jump) false16 false) ; D=D-1
+          [outM3] (cpu (c-inst false op--1 op-dest-d op-no-jump) false16 false) ; D=-1
           ]
       (is (= three16 outM1))
       (is (= two16 outM2))
@@ -44,7 +45,7 @@
   (testing "a-comp"
     (let [
           cpu (make-cpu)
-          [outM] (cpu (c-inst true [true true false true true true] [false true false] [false false false]) one16 false) ; M+1
+          [outM] (cpu (c-inst true op-a+1 op-dest-null op-no-jump) one16 false) ; M+1
           ]
       (is (= two16 outM)))))
 
@@ -53,10 +54,9 @@
     (let [
           cpu (make-cpu)
           _ (cpu (a-inst one15) false16 false)              ; @1
-          [outM1 writeM1 addressM1] (cpu (c-inst false [true true false false false false] [false true true] [false false false]) one16 false) ; MD=A
-          [outM2 writeM2 addressM2] (cpu (c-inst false [false true true true true true] [true false false] [false false false]) false16 false) ; A=D+1
-          [outM3 writeM3 addressM3] (cpu (c-inst true [true true false false false false] [true true false] [false false false]) one16 false) ; AD=M
-
+          [outM1 writeM1 addressM1] (cpu (c-inst false op-a op-dest-md op-no-jump) one16 false) ; MD=A
+          [outM2 writeM2 addressM2] (cpu (c-inst false op-d+1 op-dest-a op-no-jump) false16 false) ; A=D+1
+          [outM3 writeM3 addressM3] (cpu (c-inst true op-a op-dest-ad op-no-jump) one16 false) ; AD=M
           ]
       (is (= one16 outM1))
       (is (= true writeM1))
@@ -74,30 +74,30 @@
           cpu (make-cpu)
           [_ _ _ pc1] (cpu (a-inst one15) false16 false)    ; @1
           [_ _ _ pc2] (cpu (a-inst (bit15 (i2ba 10))) false16 false) ; @10
-          [_ _ _ pc3] (cpu (c-inst false [true true true false true false] [false true false] [false false false]) false16 false) ; D=-1
-          [_ _ _ pc4] (cpu (c-inst false [false false true true false false] [false false false] [false false true]) false16 false) ; D,JGT ; false
-          [_ _ _ pc5] (cpu (c-inst false [false false true true false false] [false false false] [false true false]) false16 false) ; D,JEQ ; false
-          [_ _ _ pc6] (cpu (c-inst false [false false true true false false] [false false false] [false true true]) false16 false) ; D,JGE ; false
-          [_ _ _ pc7] (cpu (c-inst false [false false true true false false] [false false false] [true false false]) false16 false) ; D,JLT ; true
-          [_ _ _ pc8] (cpu (c-inst false [false false true true false false] [false false false] [true false true]) false16 false) ; D,JNE ; true
-          [_ _ _ pc9] (cpu (c-inst false [false false true true false false] [false false false] [true true false]) false16 false) ; D,JLE ; true
-          [_ _ _ pc10] (cpu (c-inst false [false false true true false false] [false false false] [true true true]) false16 false) ; JMP ; true
-          [_ _ _ pc11] (cpu (c-inst false [true false true false true false] [false true false] [false false false]) false16 false) ; D=0
-          [_ _ _ pc12] (cpu (c-inst false [false false true true false false] [false false false] [false false true]) false16 false) ; D,JGT ; false
-          [_ _ _ pc13] (cpu (c-inst false [false false true true false false] [false false false] [false true false]) false16 false) ; D,JEQ ; true
-          [_ _ _ pc14] (cpu (c-inst false [false false true true false false] [false false false] [false true true]) false16 false) ; D,JGE ; true
-          [_ _ _ pc15] (cpu (c-inst false [false false true true false false] [false false false] [true false false]) false16 false) ; D,JLT ; false
-          [_ _ _ pc16] (cpu (c-inst false [false false true true false false] [false false false] [true false true]) false16 false) ; D,JNE ; false
-          [_ _ _ pc17] (cpu (c-inst false [false false true true false false] [false false false] [true true false]) false16 false) ; D,JLE ; true
-          [_ _ _ pc18] (cpu (c-inst false [false false true true false false] [false false false] [true true true]) false16 false) ; JMP ; true
-          [_ _ _ pc19] (cpu (c-inst false [true true true true true true] [false true false] [false false false]) false16 false) ; D=1
-          [_ _ _ pc20] (cpu (c-inst false [false false true true false false] [false false false] [false false true]) false16 false) ; D,JGT ; true
-          [_ _ _ pc21] (cpu (c-inst false [false false true true false false] [false false false] [false true false]) false16 false) ; D,JEQ ; false
-          [_ _ _ pc22] (cpu (c-inst false [false false true true false false] [false false false] [false true true]) false16 false) ; D,JGE ; true
-          [_ _ _ pc23] (cpu (c-inst false [false false true true false false] [false false false] [true false false]) false16 false) ; D,JLT ; false
-          [_ _ _ pc24] (cpu (c-inst false [false false true true false false] [false false false] [true false true]) false16 false) ; D,JNE ; true
-          [_ _ _ pc25] (cpu (c-inst false [false false true true false false] [false false false] [true true false]) false16 false) ; D,JLE ; false
-          [_ _ _ pc26] (cpu (c-inst false [false false true true false false] [false false false] [true true true]) false16 false) ; JMP ; true
+          [_ _ _ pc3] (cpu (c-inst false op--1 op-dest-d op-no-jump) false16 false) ; D=-1
+          [_ _ _ pc4] (cpu (c-inst false op-d op-dest-null op-jgt) false16 false) ; D,JGT ; false
+          [_ _ _ pc5] (cpu (c-inst false op-d op-dest-null op-jeq) false16 false) ; D,JEQ ; false
+          [_ _ _ pc6] (cpu (c-inst false op-d op-dest-null op-jge) false16 false) ; D,JGE ; false
+          [_ _ _ pc7] (cpu (c-inst false op-d op-dest-null op-jlt) false16 false) ; D,JLT ; true
+          [_ _ _ pc8] (cpu (c-inst false op-d op-dest-null op-jne) false16 false) ; D,JNE ; true
+          [_ _ _ pc9] (cpu (c-inst false op-d op-dest-null op-jle) false16 false) ; D,JLE ; true
+          [_ _ _ pc10] (cpu (c-inst false op-d op-dest-null op-jmp) false16 false) ; JMP ; true
+          [_ _ _ pc11] (cpu (c-inst false op-0 op-dest-d op-no-jump) false16 false) ; D=0
+          [_ _ _ pc12] (cpu (c-inst false op-d op-dest-null op-jgt) false16 false) ; D,JGT ; false
+          [_ _ _ pc13] (cpu (c-inst false op-d op-dest-null op-jeq) false16 false) ; D,JEQ ; true
+          [_ _ _ pc14] (cpu (c-inst false op-d op-dest-null op-jge) false16 false) ; D,JGE ; true
+          [_ _ _ pc15] (cpu (c-inst false op-d op-dest-null op-jlt) false16 false) ; D,JLT ; false
+          [_ _ _ pc16] (cpu (c-inst false op-d op-dest-null op-jne) false16 false) ; D,JNE ; false
+          [_ _ _ pc17] (cpu (c-inst false op-d op-dest-null op-jle) false16 false) ; D,JLE ; true
+          [_ _ _ pc18] (cpu (c-inst false op-d op-dest-null op-jmp) false16 false) ; JMP ; true
+          [_ _ _ pc19] (cpu (c-inst false op-1 op-dest-d op-no-jump) false16 false) ; D=1
+          [_ _ _ pc20] (cpu (c-inst false op-d op-dest-null op-jgt) false16 false) ; D,JGT ; true
+          [_ _ _ pc21] (cpu (c-inst false op-d op-dest-null op-jeq) false16 false) ; D,JEQ ; false
+          [_ _ _ pc22] (cpu (c-inst false op-d op-dest-null op-jge) false16 false) ; D,JGE ; true
+          [_ _ _ pc23] (cpu (c-inst false op-d op-dest-null op-jlt) false16 false) ; D,JLT ; false
+          [_ _ _ pc24] (cpu (c-inst false op-d op-dest-null op-jne) false16 false) ; D,JNE ; true
+          [_ _ _ pc25] (cpu (c-inst false op-d op-dest-null op-jle) false16 false) ; D,JLE ; false
+          [_ _ _ pc26] (cpu (c-inst false op-d op-dest-null op-jmp) false16 false) ; JMP ; true
           [_ _ _ pc27] (cpu (a-inst one15) false16 false)   ; @1
           ]
       (is (= zero16 pc1))                                   ; since inc of pc at the first clock is zero, our cpu runs ProgMem[0] twice

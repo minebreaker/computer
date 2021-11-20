@@ -1,13 +1,14 @@
 (ns rip.deadcode.computer.component.debug
-  (:require [rip.deadcode.computer.component.extensional :refer :all]
-            [rip.deadcode.computer.component.hardware :refer [i2s]]
+  (:require [rip.deadcode.computer.component.hardware :refer :all]
+            [rip.deadcode.computer.component.opcode :refer :all]
+            [rip.deadcode.computer.component.extensional :refer :all]
             [clojure.core.match :refer [match]]))
 
 
 (defn decode [[i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15]]
   (if (false? i0)
     (let [i (ba2i [i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 false])]
-    (str "IA " i " " (i2s i)))
+      (str "IA " i " " (i2s i)))
     (str
       "IC ["
       (let [A (if (false? i3) "A" "M")]
