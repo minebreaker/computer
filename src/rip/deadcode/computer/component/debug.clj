@@ -1,6 +1,5 @@
 (ns rip.deadcode.computer.component.debug
   (:require [rip.deadcode.computer.component.hardware :refer :all]
-            [rip.deadcode.computer.component.opcode :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]
             [clojure.core.match :refer [match]]))
 
@@ -49,3 +48,6 @@
             [true false true] "JNE"
             [true true false] "JLE"
             [true true true] "JMP") "]")))
+
+(defn decode-ops [op]
+  (println (reduce str (map #(str (decode %) "\n") op))))

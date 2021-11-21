@@ -1,6 +1,9 @@
 (ns rip.deadcode.computer.component.compiler-test
   (:require [clojure.test :refer :all]
-            [rip.deadcode.computer.component.compiler :refer :all]))
+            [rip.deadcode.computer.component.compiler :refer :all]
+            [rip.deadcode.computer.component.debug :refer :all]
+            [rip.deadcode.computer.component.computer :refer [computer]]
+            [rip.deadcode.computer.component.hardware :refer [make-program-memory]]))
 
 
 (deftest lext-test
@@ -51,3 +54,17 @@
                                   }
                                 }
                                ")))))))
+
+(deftest decoder
+  (testing "decode"
+    (let [op (compile (parse (lex "println(\"helloworld\");")))]
+      (decode-ops op))))
+
+(deftest compile-test
+  (testing "compile"
+    (is (=
+          "helloworld\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "println(\"helloworld\");"))))))))))
+
