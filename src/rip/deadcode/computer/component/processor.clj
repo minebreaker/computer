@@ -3,7 +3,6 @@
             [rip.deadcode.computer.component.basic :refer :all]
             [rip.deadcode.computer.component.alu :refer :all]
             [rip.deadcode.computer.component.memory :refer :all]
-            [rip.deadcode.computer.component.opcode :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]
             [rip.deadcode.computer.component.debug :refer [decode]]))
 

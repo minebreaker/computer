@@ -33,4 +33,21 @@
                                   f2(\"B\");
                                 } else {
                                   f3(4);
-                                }")))))))
+                                }")))))
+    (is (=
+          {:type "for"
+           :init {:type "assign" :name "i" :value {:type "int" :value 0}}
+           :cond {:type "le" :x {:type "ref" :name "i"} :y {:type "int" :value 10}}
+           :loop {:type "inc" :x {:type "ref" :name "i"}}
+           :body {:type "if"
+                  :cond {:type "rem" :x {:type "ref" :name "i"} :y {:type "int" :value 2} :z {:type "int" :value 0}}
+                  :then {:type "call" :name "println" :arg {:type "str" :value "even"}}
+                  :else {:type "call" :name "println" :arg {:type "str" :value "odd"}}}}
+          (cleanup (parse (lex "for (int i = 0; i <= 10; i++) {
+                                  if (i % 2 == 0) {
+                                    println(\"even\");
+                                  } else {
+                                    println(\"odd\");
+                                  }
+                                }
+                               ")))))))

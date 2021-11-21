@@ -1,5 +1,5 @@
 (ns rip.deadcode.computer.component.compiler
-  (:require [rip.deadcode.computer.component.opcode :refer :all]
+  (:require [rip.deadcode.computer.component.extensional :refer :all]
             [clojure.string :refer [blank? split]]
             [clojure.core.match :refer [match]]))
 
@@ -28,21 +28,20 @@
 (defn parse-for [code]
   (let [
         res-init (match [code]
-                   [(["for" "(" & res] :seq)] (parse res))
-        res-cond (match [(:rest res-init)]
-                   [([";" & res] :seq)] (parse res))
-        res-next (parse (match [(:rest res-cond)]
-                          [([";" & res] :seq)] res))
-        res-stmt (match [(:rest res-next)]
+                   [(["for" "(" _ & res] :seq)] (parse res))
+        res-cond (parse (:rest res-init))
+        res-loop (parse (:rest res-cond))
+        res-body (match [(:rest res-loop)]
                    [([")" "{" & res] :seq)] (parse res))
-        res (match [(:rest res-stmt)]
+        res (match [(:rest res-body)]
               [(["}" & res] :seq)] res)
         ]
-    {:type      "for"
-     :init      res-init
-     :cond-expr res-cond
-     :res-next  res-next
-     :rest      res}))
+    {:type "for"
+     :init res-init
+     :cond res-cond
+     :loop res-loop
+     :body res-body
+     :rest res}))
 
 (defn parse-if [code]
   (let [
@@ -77,6 +76,8 @@
   (let [[t0 t1 t2 t3 t4] code]
     (cond
       (= t1 "=") {:type "assign" :name t0 :value (parse-value t2) :rest (drop-semi (drop 3 code))}
+      (= t1 "<=") {:type "le" :x (parse-value t0) :y (parse-value t2) :rest (drop-semi (drop 3 code))}
+      (= t1 "++") {:type "inc" :x (parse-value t0) :rest (drop-semi (drop 2 code))}
       (and (= t1 "%") (= t3 "==")) {:type "rem" :x (parse-value t0) :y (parse-value t2) :z (parse-value t4) :rest (drop-semi (drop 5 code))}
       (= t0 "for") (parse-for code)
       (= t0 "if") (parse-if code)

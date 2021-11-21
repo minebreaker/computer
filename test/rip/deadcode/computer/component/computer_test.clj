@@ -1,6 +1,5 @@
 (ns rip.deadcode.computer.component.computer-test
   (:require [clojure.test :refer :all]
-            [rip.deadcode.computer.component.opcode :refer :all]
             [rip.deadcode.computer.component.hardware :refer :all]
             [rip.deadcode.computer.component.computer :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]))

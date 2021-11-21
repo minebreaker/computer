@@ -1,8 +1,7 @@
 (ns rip.deadcode.computer.component.processor-test
   (:require [clojure.test :refer :all]
             [rip.deadcode.computer.component.extensional :refer :all]
-            [rip.deadcode.computer.component.processor :refer :all]
-            [rip.deadcode.computer.component.opcode :refer :all]))
+            [rip.deadcode.computer.component.processor :refer :all]))
 
 (deftest cpu-test-a-instruction
   (testing "a-instruction"
