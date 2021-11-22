@@ -7,9 +7,9 @@
 (defn decode [[i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15]]
   (if (false? i0)
     (let [i (ba2i [i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 false])]
-      (str "IA " i " " (i2s i)))
+      (str "A " i " " (i2s i)))
     (str
-      "IC ["
+      "C ["
       (let [A (if (false? i3) "A" "M")]
         (match [i4 i5 i6 i7 i8 i9]
           [true false true false true false] "0"

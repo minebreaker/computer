@@ -29,7 +29,7 @@
 (defn parse-for [code]
   (let [
         res-init (match [code]
-                   [(["for" "(" _ & res] :seq)] (parse res))
+                   [(["for" "(" & res] :seq)] (parse res))
         res-cond (parse (:rest res-init))
         res-loop (parse (:rest res-cond))
         res-body (match [(:rest res-loop)]
@@ -76,14 +76,14 @@
   [code]
   (let [[t0 t1 t2 t3 t4] code]
     (cond
-      (= t1 "=") {:type "assign" :name t0 :value (parse-value t2) :rest (drop-semi (drop 3 code))}
+      (= t2 "=") {:type "assign" :name t1 :value (parse-value t3) :rest (drop-semi (drop 4 code))}
       (= t1 "<=") {:type "le" :x (parse-value t0) :y (parse-value t2) :rest (drop-semi (drop 3 code))}
       (= t1 "++") {:type "inc" :x (parse-value t0) :rest (drop-semi (drop 2 code))}
       (and (= t1 "%") (= t3 "==")) {:type "rem" :x (parse-value t0) :y (parse-value t2) :z (parse-value t4) :rest (drop-semi (drop 5 code))}
       (= t0 "for") (parse-for code)
       (= t0 "if") (parse-if code)
       (and (re-matches #"[\w]+" t0) (= t1 "(") (= t3 ")")) {:type "call" :name t0 :arg (parse-value t2) :rest (drop-semi (drop 4 code))}
-      :else (parse (rest code)))))
+      :else (let [v (parse-value t0)] (merge v {:rest (rest code)})))))
 
 (declare -compile)
 
@@ -141,8 +141,8 @@
      var]))
 
 (defn compile-le [code var]
-  (let [[op _] (-compile (:x code) var)
-        [op' _] (-compile (:y op) var)]
+  (let [[op] (-compile (:x code) var)
+        [op'] (-compile (:y op) var)]
     [(merge
        op                                                   ; D=x
        [(a-inst zero15)                                     ; @0
@@ -151,7 +151,7 @@
        op'                                                  ; D=y
        [(a-inst zero15)                                     ; @0
         (c-inst false op-d-a op-dest-d)                     ; D=M-D ; x-y
-        (a-inst (bit15 (i2ba (+ (:i var) 7))))              ; @jump ; i+7
+        (a-inst (bit15 (i2ba (+ (:offset var) 7))))         ; @jump ; i+7
         (c-inst false op-d op-dest-null op-jle)             ; JLE,D
         (c-inst false op-0 op-dest-d)                       ; D=0
         (c-inst false op-1 op-dest-d)                       ; D=1
@@ -160,14 +160,16 @@
 
 
 (defn compile-inc [code var]
-  (let [[op] (-compile (:x code) var)]
-    (merge
-      op                                                    ; D=x
-      [; D=D+1
-       ])
+  ; i++
+  (let [name (:name code)
+        ptr (get (:var var) name)]
+    ; @ptr
+    ; MD=M+1
+    [, var]
     )
   )
 
+(defn compile-rem [code var])
 
 (defn compile-call [code var]
   (let [{name :name arg :arg} code
@@ -192,18 +194,42 @@
      ]))
 
 
+(defn compile-for [code var])
+
+(defn compile-if [code var]
+  (let [offset (:offset var)
+        {cond :cond then :then else :else} code
+        [op-cond] (-compile cond var)
+        c-op-cond (count op-cond)
+        [op-then] (-compile then (merge var {:offset (+ c-op-cond 2)}))
+        c-op-then (count op-then)
+        [op-else] (-compile else (merge var {:offset (+ c-op-cond c-op-then 4)}))
+        c-op-else (count op-else)
+        ]
+    [(vec (concat
+            op-cond
+            [(a-inst (bit15 (i2ba (+ offset c-op-cond c-op-then 4)))) ; A = offset + len(op-cond) + 2 +len(op-then) + 2
+             (c-inst false op-d op-dest-null op-jeq)        ; D,JNE ; if cond = false jump to op-else
+             ]
+            op-then
+            [(a-inst (bit15 (i2ba (+ offset c-op-cond c-op-then c-op-else 4)))) ; A = offset + len(op-cond) + 2 + len(op-then) + 2 + len(op-else)
+             (c-inst false op-0 op-dest-null op-jmp)]       ; D,JMP ; jump to last
+            op-else
+            ))
+     var]))
+
 (defn increment-code-index [[code var]]
-  [code (merge var {:i (+ (:i var) (count code))})])
+  [code (merge var {:offset (+ (:offset var) (count code))})])
 
 (defn -compile [code var]
   "var - Variable table
-    :i      - beginning index of the next code
-    :var    - variable map
-      key   - name of variable
-      value - pointer to the variable
-    :const  - strings index map
-      key   - string itself is a key
-      value - pointer to the string
+    ::offset    - beginning index of the next code
+    :var        - variable map
+      key       - string name of variable
+      value     - pointer to the variable
+    :const      - strings index map
+      key       - string itself is a key
+      value     - pointer to the string
     :next-var   - next pointer to the variable
     :next-const - next pointer to save objects"
   (let [type (:type code)]
@@ -218,15 +244,15 @@
         (= type "rem") nil
         (= type "call") (compile-call code var)
         (= type "for") nil
-        (= type "if") nil
+        (= type "if") (compile-if code var)
         ))
     )
   )
 
 (defn compile [code]
-  (let [[op var] (-compile code {:i 0 :var {} :const {} :next-var 4 :next-const 12})]
+  (let [[op var] (-compile code {:offset 0 :var {} :const {} :next-var 4 :next-const 12})]
     (vec (concat
            op
-           [(a-inst (bit15 (i2ba (+ (:i var) 1))))
+           [(a-inst (bit15 (i2ba (+ (:offset var) 1))))
             (c-inst false op-0 op-dest-null op-jmp)         ; Infinite jump to here
             (a-inst zero15)]))))
