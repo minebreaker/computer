@@ -16,7 +16,7 @@ jobs:
           java-version: 17
       - name: Set up Leiningen
         run: |
-          curl https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
+          curl -o lein https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein
           chmod +x lein
       - name: Run tests
         run: lein test
