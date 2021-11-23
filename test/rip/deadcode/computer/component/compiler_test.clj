@@ -41,7 +41,7 @@
           {:type "for"
            :init {:type "assign" :name "i" :value {:type "int" :value 0}}
            :cond {:type "le" :x {:type "ref" :name "i"} :y {:type "int" :value 10}}
-           :loop {:type "inc" :x {:type "ref" :name "i"}}
+           :loop {:type "inc" :name "i"}
            :body {:type "if"
                   :cond {:type "rem" :x {:type "ref" :name "i"} :y {:type "int" :value 2} :z {:type "int" :value 0}}
                   :then {:type "call" :name "println" :arg {:type "str" :value "even"}}

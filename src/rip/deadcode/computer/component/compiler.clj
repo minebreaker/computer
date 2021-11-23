@@ -78,7 +78,7 @@
     (cond
       (= t2 "=") {:type "assign" :name t1 :value (parse-value t3) :rest (drop-semi (drop 4 code))}
       (= t1 "<=") {:type "le" :x (parse-value t0) :y (parse-value t2) :rest (drop-semi (drop 3 code))}
-      (= t1 "++") {:type "inc" :x (parse-value t0) :rest (drop-semi (drop 2 code))}
+      (= t1 "++") {:type "inc" :name t0 :rest (drop-semi (drop 2 code))}
       (and (= t1 "%") (= t3 "==")) {:type "rem" :x (parse-value t0) :y (parse-value t2) :z (parse-value t4) :rest (drop-semi (drop 5 code))}
       (= t0 "for") (parse-for code)
       (= t0 "if") (parse-if code)
@@ -160,16 +160,15 @@
 
 
 (defn compile-inc [code var]
-  ; i++
-  (let [name (:name code)
+  (let [{name :name} code
         ptr (get (:var var) name)]
-    ; @ptr
-    ; MD=M+1
-    [, var]
-    )
-  )
+    [[(a-inst (bit15 (i2ba var)))                           ; @ptr
+      (c-inst true op-a op-dest-md)                         ; MD=M+1
+      ]
+     var]))
 
-(defn compile-rem [code var])
+(defn compile-rem [code var]
+  )
 
 (defn compile-call [code var]
   (let [{name :name arg :arg} code
@@ -194,7 +193,30 @@
      ]))
 
 
-(defn compile-for [code var])
+(defn compile-for [code var]
+  (let [offset (:offset var)
+        {init :init cond :cond loop :loop body :body} code
+        [op-init var'] (-compile init var)
+        c-op-init (count op-init)
+        [op-cond] (-compile cond var')
+        c-op-cond (count op-cond)
+        [op-loop] (-compile cond var')
+        c-op-loop (count op-loop)
+        [op-body] (-compile body var')
+        c-op-body (count op-body)
+        ]
+    [(vec (concat
+            op-init
+            op-cond
+            [(a-inst (bit15 (i2ba (+ offset c-op-init c-op-cond c-op-body c-op-loop 4)))) ; @ the end of the loop
+             (c-inst false op-d op-dest-null op-jne)        ; D,JNE
+             ]
+            op-body
+            op-loop
+            [(a-inst (bit15 (i2ba (+ offset c-op-init))))   ; @cond
+             (c-inst false op-0 op-dest-null op-jmp)        ; JMP
+             ]))
+     var]))
 
 (defn compile-if [code var]
   (let [offset (:offset var)
@@ -240,10 +262,10 @@
         (= type "str") (compile-str code var)
         (= type "ref") (compile-ref code var)
         (= type "le") (compile-le code var)
-        (= type "inc") nil
-        (= type "rem") nil
+        (= type "inc") (compile-inc code var)
+        (= type "rem") (compile-rem code var)
         (= type "call") (compile-call code var)
-        (= type "for") nil
+        (= type "for") (compile-for code var)
         (= type "if") (compile-if code var)
         ))
     )
