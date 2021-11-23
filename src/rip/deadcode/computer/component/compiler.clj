@@ -87,6 +87,17 @@
 
 (declare -compile)
 
+(defn compile-assign [code var]
+  (let [{name :name value :value} code
+        {local :local ptr :next-local} var
+        op-value (-compile value var)]
+    [[op-value                                              ; D=value
+      (a-inst (bit15 (i2ba ptr)))                           ; @ptr
+      (c-inst op-d op-dest-m)                               ; M=D
+      ]
+     (merge var {:local (merge local {name ptr}) :next-local (inc ptr)})])
+  )
+
 (defn compile-int [code]
   [(a-inst (bit15 (i2ba (:value code))))                    ; @i
    (c-inst false op-a op-dest-d op-no-jump)                 ; D=A
@@ -133,9 +144,9 @@
     [out-code out-var]))
 
 (defn compile-ref [code var]
-  (let [var-ptr (get (:var var) (:name code))]
+  (let [ptr (get (:local var) (:name code))]
     [[
-      (a-inst (bit15 (i2ba (int var-ptr))))                 ; @var-ptr
+      (a-inst (bit15 (i2ba (int ptr))))                     ; @ptr
       (c-inst false op-a op-dest-d op-no-jump)              ; D=M
       ]
      var]))
@@ -168,7 +179,7 @@
 
 (defn compile-inc [code var]
   (let [{name :name} code
-        ptr (get (:var var) name)]
+        ptr (get (:local var) name)]
     [[(a-inst (bit15 (i2ba ptr)))                           ; @ptr
       (c-inst true op-a op-dest-md)                         ; MD=M+1
       ]
@@ -287,18 +298,18 @@
 (defn -compile [code var]
   "var - Variable table
     :offset     - beginning index of the next code
-    :var        - variable map
+    :local      - variable map
       key       - string name of variable
       value     - pointer to the variable
     :const      - strings index map
       key       - string itself is a key
       value     - pointer to the string
-    :next-var   - next pointer to the variable
+    :next-local - next pointer to the variable
     :next-const - next pointer to save objects"
   (let [type (:type code)]
     (increment-offset
       (cond
-        (= type "assign") ()
+        (= type "assign") (compile-assign code var)
         (= type "int") [(compile-int code) var]
         (= type "str") (compile-str code var)
         (= type "ref") (compile-ref code var)
@@ -313,7 +324,7 @@
   )
 
 (defn compile [code]
-  (let [[op] (-compile code {:offset 0 :var {} :const {} :next-var 4 :next-const 12})]
+  (let [[op] (-compile code {:offset 0 :local {} :const {} :next-local 4 :next-const 12})]
     (vec (concat
            op
            [exit-inst
