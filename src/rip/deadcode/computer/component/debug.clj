@@ -29,7 +29,8 @@
           [false true false false true true] (str "D-" A)
           [false false false true true true] (str A "-D")
           [false false false false false false] (str "D&" A)
-          [false true false true false true] (str "D|" A))) "] "
+          [false true false true false true] (str "D|" A)))
+      (if (true? i2) ">>1" "") "] "
       "[" (match [i10 i11 i12]
             [false false false] "null"
             [false false true] "M"

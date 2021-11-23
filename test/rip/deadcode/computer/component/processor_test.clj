@@ -41,12 +41,14 @@
       (is (= m-one16 outM3)))))
 
 (deftest cpu-test-c-instruction-c-comp
-  (testing "a-comp"
+  (testing "c-comp"
     (let [
           cpu (make-cpu)
-          [outM] (cpu (c-inst true op-a+1 op-dest-null op-no-jump) one16 false) ; M+1
+          [outM1] (cpu (c-inst true op-a+1 op-dest-null op-no-jump) one16 false) ; M+1
+          [outM2] (cpu (c-inst [false true] true op-a op-dest-null op-no-jump) (i2ba 4) false) ; M>>1
           ]
-      (is (= two16 outM)))))
+      (is (= two16 outM1))
+      (is (= two16 outM2)))))
 
 (deftest cpu-test-c-instruction-dest
   (testing "dest"

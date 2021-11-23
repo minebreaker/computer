@@ -22,7 +22,9 @@
   "
   (let [
         [instruction-type v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15] instruction ; A-instruction
-        [_ _ _
+        [_
+         exit                                               ; Exit command
+         e                                                  ; Bit shift right?
          a c1 c2 c3 c4 c5 c6
          d1                                                 ; Save to A?
          d2                                                 ; Save to D?
@@ -38,7 +40,8 @@
         [outM zr ng] (alu
                        d-current
                        (mux16 a-current inM a)              ; if comp-a == true inM else A-register
-                       c1 c2 c3 c4 c5 c6)
+                       c1 c2 c3 c4 c5 c6
+                       e)
 
 
         _ (a-register

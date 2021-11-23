@@ -42,7 +42,7 @@
   (let [[result] (adder16 in [true false false false false false false false false false false false false false false false] false)]
     result))
 
-(defn alu [x y zx nx zy ny f no]
+(defn alu [x y zx nx zy ny f no rs]
   "
   ALU taken from *The Elements of Computing Systems*
   x 16bit input 1
@@ -53,6 +53,7 @@
   ny negate y
   f false: add; true: and
   no negate output
+  rs right-shift output
   @returns [out zr ng] where
     out 16bit output
     zr true when out = 0
@@ -66,8 +67,11 @@
 
         [radd] (adder16 x-negate y-negate false)
         rand (and16-16 x-negate y-negate)
-        out-temp (mux16 rand radd f)
-        out (xor16-16 out-temp (expand16 no))
+        out-added (mux16 rand radd f)
+        out-negated (xor16-16 out-added (expand16 no))
+        out (let [[_ v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15] out-negated
+                  shifted [v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 false]]
+              (mux16 out-negated shifted rs))
         zr (not (or16-1 out))
         ng (nth out 15)]                                    ; it's ok to use nth as long as the index is a constant
 
