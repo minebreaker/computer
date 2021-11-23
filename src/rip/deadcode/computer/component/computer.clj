@@ -7,7 +7,6 @@
             [rip.deadcode.computer.component.extensional :refer :all]))
 
 
-(def loop "Arbitrary number to limit the execution of the circuit" 128)
 (defn computer [program-memory]
   (let [
         cpu (make-cpu)
@@ -23,14 +22,15 @@
                    )
                  )
         ]
-    (dotimes [_ loop]
+    (loop []
       (let [
             [_ _ current-address pc] (cpu false16 false16 false true)
             instruction (program-memory pc)
             inM (memory false16 current-address false)
-            [outM writeM addressM] (cpu instruction inM false)
+            [outM writeM addressM _ exit] (cpu instruction inM false)
             ]
         (memory outM addressM writeM)
+        (if (false? exit) (recur))
         )
       )
     )

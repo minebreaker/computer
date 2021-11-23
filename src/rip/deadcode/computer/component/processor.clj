@@ -63,7 +63,10 @@
                   (not disable-loading))                    ; not disabled
         pc-inc (not (or pc-load disable-loading))           ; neither load nor disabled
         pc-out (pc a-current pc-inc pc-load reset)
+
+        exit-out (and instruction-type exit)                ; c-instruction & exit code is true
         ]
+
 
     ;(println (str "Load disabled " disable-loading))
     ;(println (decode instruction))
@@ -77,9 +80,10 @@
     ;(println (str "PC LOAD " pc-load))
     ;(println (str "PC " pc-out " " (ba2i pc-out)))
     ;(println (str "L " pc-load))
+    ;(println (str "E " exit-out))
     ;(println)
 
-    [outM d3 a-current pc-out]
+    [outM d3 a-current pc-out exit-out]
     ))
 
 (defn make-cpu []

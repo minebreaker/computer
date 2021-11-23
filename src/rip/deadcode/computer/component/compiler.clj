@@ -272,9 +272,8 @@
   )
 
 (defn compile [code]
-  (let [[op var] (-compile code {:offset 0 :var {} :const {} :next-var 4 :next-const 12})]
+  (let [[op] (-compile code {:offset 0 :var {} :const {} :next-var 4 :next-const 12})]
     (vec (concat
            op
-           [(a-inst (bit15 (i2ba (+ (:offset var) 1))))
-            (c-inst false op-0 op-dest-null op-jmp)         ; Infinite jump to here
+           [exit-inst
             (a-inst zero15)]))))

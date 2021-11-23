@@ -55,11 +55,11 @@
                                 }
                                ")))))))
 
-;(deftest decoder
-;  (testing "decode"
-;    (let [op (compile (parse (lex "if (0) { println(\"NG\"); } else if (1) { println(\"OK\"); } else { println(\"NG\"); }")))]
-;      (println op)
-;      (decode-ops op))))
+(deftest decoder
+  (testing "decode"
+    (let [op (compile (parse (lex "println(\"helloworld\");")))]
+      (println op)
+      (decode-ops op))))
 
 (deftest compile-test
   (testing "compile"
@@ -67,7 +67,8 @@
           "helloworld\n"
           (with-out-str
             (computer
-              (make-program-memory (compile (parse (lex "println(\"helloworld\");")))))))))
+              (make-program-memory (compile (parse (lex "println(\"helloworld\");"))))))))
+    )
   (testing "if"
     (is (=
           "OK\n"
@@ -89,4 +90,5 @@
           (with-out-str
             (computer
               (make-program-memory (compile (parse (lex "if (0) { println(\"NG\"); } else if (0) { println(\"NG\"); } else { println(\"OK\"); }"))))))))
-    ))
+    )
+  )

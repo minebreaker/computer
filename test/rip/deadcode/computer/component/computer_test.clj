@@ -17,6 +17,6 @@
              (a-inst console-idx)                           ; @console
              (c-inst false op-d op-dest-m op-no-jump)       ; M=D
              (a-inst (bit15 (i2ba 5)))                      ; @5
-             (c-inst false op-0 op-dest-null op-jmp)        ; JMP
+             exit-inst                                      ; EXIT
              (a-inst zero15)                                ; null
              ]))))))

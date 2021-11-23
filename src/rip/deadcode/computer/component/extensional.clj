@@ -87,9 +87,14 @@
 (defn a-inst [bits]
   "Creates a-instruction from bool array[15]"
   (into [false] bits))
+
 (defn c-inst
   "Creates c-instruction from extension-code, a-code, comp[6], dest[3], jump[3]"
   ([comp dest] (c-inst false comp dest))
   ([a comp dest] (c-inst a comp dest op-no-jump))
   ([a comp dest jump] (c-inst [false false] a comp dest jump))
   ([ext a comp dest jump] (vec (concat [true] ext [a] comp dest jump))))
+
+(def exit-inst
+  "Signals to exit"
+  (vec (concat [true true false] op-0 op-dest-null op-no-jump)))
