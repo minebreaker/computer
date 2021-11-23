@@ -108,7 +108,7 @@
                              (a-inst obj-ptr)               ; @obj-ptr
                              (c-inst false op-a op-dest-d)  ; D=A
                              (a-inst zero15)                ; @0
-                             (c-inst true op-d op-dest-m)   ; M=D ; t0 = obj-ptr
+                             (c-inst true op-d op-dest-m)   ; M=D ; t0 = obj-ptr ; FIXME: t addr must be global
                              (a-inst (bit15 (i2ba (+ n 1)))) ; @(n+1)
                              (c-inst false op-a op-dest-d)  ; D=A
                              (a-inst zero15)                ; @0
@@ -141,33 +141,74 @@
      var]))
 
 (defn compile-le [code var]
-  (let [[op] (-compile (:x code) var)
-        [op'] (-compile (:y op) var)]
-    [(merge
-       op                                                   ; D=x
-       [(a-inst zero15)                                     ; @0
-        (c-inst false op-d op-dest-m)                       ; M=D ; t0=x
-        ]
-       op'                                                  ; D=y
-       [(a-inst zero15)                                     ; @0
-        (c-inst false op-d-a op-dest-d)                     ; D=M-D ; x-y
-        (a-inst (bit15 (i2ba (+ (:offset var) 7))))         ; @jump ; i+7
-        (c-inst false op-d op-dest-null op-jle)             ; JLE,D
-        (c-inst false op-0 op-dest-d)                       ; D=0
-        (c-inst false op-1 op-dest-d)                       ; D=1
-        ])
+  (let [{offset :offset} var
+        {x :x y :y} code
+        [op-x] (-compile x var)
+        c-op-x (count op-x)
+        [op-y] (-compile y var)
+        c-op-y (count op-y)]
+    [(vec (concat
+            op-x                                            ; D=x
+            [(a-inst zero15)                                ; @0
+             (c-inst false op-d op-dest-m)                  ; M=D ; t0=x ; FIXME global t
+             ]
+            op-y                                            ; D=y
+            [(a-inst zero15)                                ; @0
+             (c-inst false op-d-a op-dest-d)                ; D=M-D ; x-y
+             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 8))))
+             (c-inst false op-d op-dest-null op-jle)        ; D,JLE ; jump if x-y <= 0
+             (c-inst false op-0 op-dest-d)                  ; D=0 ; when x-y > 0
+             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 9))))
+             (c-inst false op-0 op-dest-null op-jmp)        ; JMP ; jump to last
+             (c-inst false op-1 op-dest-d)                  ; D=1 ; when x-y <= 0
+             (c-inst op-d op-dest-null)                     ; D
+             ]))
      var]))
 
 
 (defn compile-inc [code var]
   (let [{name :name} code
         ptr (get (:var var) name)]
-    [[(a-inst (bit15 (i2ba var)))                           ; @ptr
+    [[(a-inst (bit15 (i2ba ptr)))                           ; @ptr
       (c-inst true op-a op-dest-md)                         ; MD=M+1
       ]
      var]))
 
 (defn compile-rem [code var]
+  (let [{x :x y :y z :z} code
+        {offset :offset} var
+        [op-x] (-compile x var)
+        c-op-x (count op-x)
+        [op-y] (-compile y var)
+        c-op-y (count op-y)
+        [op-z] (-compile z var)
+        c-op-z (count op-z)]
+    [[; calculate remainder
+      op-x                                                  ; D=x
+      (a-inst zero15)                                       ; @t0
+      (c-inst true op-d op-dest-m)                          ; M=D ; t0=x
+      op-y                                                  ; D=y
+      (a-inst zero15)                                       ; @t0 ; FIXME global t
+      (c-inst true op-a-d op-dest-md)                       ; MD=M-D ; x=x-y
+      (a-inst (bit15 (i2ba (+ offset c-op-x 3))))           ; @ point of op-y
+      (c-inst false op-d op-dest-null op-jge)               ; D,JGE ; repeat while x-y > 0
+      (a-inst zero15)                                       ; @t0
+      op-y                                                  ; D=y
+      (c-inst true op-d+a op-dest-m)                        ; M=D+M ; t0=rem+y
+      ; check if rem equals to z
+      op-z                                                  ; D=z
+      (a-inst zero15)                                       ; @t0
+      (c-inst true op-d-a op-dest-null op-jeq)              ; D=D-M,JEQ
+      (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 5 c-op-y 1 c-op-z 8))))
+      (c-inst false op-d op-dest-null op-jeq)               ; D,JEQ ; jump if rem-z = 0
+      (c-inst op-0 op-dest-d)                               ; D=0 ; when rem != z
+      (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 5 c-op-y 1 c-op-z 9))))
+      (c-inst false op-0 op-dest-null op-jmp)               ; JMP ; jump to last
+      (c-inst op-1 op-dest-d)                               ; D=1 ; when rem = z
+      (c-inst op-d op-dest-d)                               ; D
+      ]
+     var]
+    )
   )
 
 (defn compile-call [code var]
@@ -240,12 +281,12 @@
             ))
      var]))
 
-(defn increment-code-index [[code var]]
+(defn increment-offset [[code var]]
   [code (merge var {:offset (+ (:offset var) (count code))})])
 
 (defn -compile [code var]
   "var - Variable table
-    ::offset    - beginning index of the next code
+    :offset     - beginning index of the next code
     :var        - variable map
       key       - string name of variable
       value     - pointer to the variable
@@ -255,9 +296,9 @@
     :next-var   - next pointer to the variable
     :next-const - next pointer to save objects"
   (let [type (:type code)]
-    (increment-code-index
+    (increment-offset
       (cond
-        (= type "assign") nil
+        (= type "assign") ()
         (= type "int") [(compile-int code) var]
         (= type "str") (compile-str code var)
         (= type "ref") (compile-ref code var)
