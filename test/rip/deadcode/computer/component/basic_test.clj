@@ -93,12 +93,12 @@
     (is (false? (mux8 false false false false false false false false [false false false])))
     (is (true? (mux8 true false false false false false false false [false false false])))
     (is (true? (mux8 false true false false false false false false [true false false])))
-    (is (true? (mux8 true false true false false false false false [false true false])))
-    (is (true? (mux8 true false false true false false false false [true true false])))
-    (is (true? (mux8 true false false false true false false false [false false true])))
-    (is (true? (mux8 true false false false false true false false [true false true])))
-    (is (true? (mux8 true false false false false false true false [false true true])))
-    (is (true? (mux8 true false false false false false false true [true true true])))))
+    (is (true? (mux8 false false true false false false false false [false true false])))
+    (is (true? (mux8 false false false true false false false false [true true false])))
+    (is (true? (mux8 false false false false true false false false [false false true])))
+    (is (true? (mux8 false false false false false true false false [true false true])))
+    (is (true? (mux8 false false false false false false true false [false true true])))
+    (is (true? (mux8 false false false false false false false true [true true true])))))
 
 (deftest mux16-8-test
   (testing "mux16-8"
