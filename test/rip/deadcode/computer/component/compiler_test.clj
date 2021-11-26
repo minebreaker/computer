@@ -6,7 +6,7 @@
             [rip.deadcode.computer.component.hardware :refer [make-program-memory]]))
 
 
-(deftest lext-test
+(deftest lex-test
   (testing "lex"
     (is (=
           '("if" "(" "x" "==" "2" ")" "{" "println" "(" "\"OK\"" ")" ";" "}" "else" "{" "println" "(" "\"NG\"" ")" ";" "}")
@@ -55,9 +55,10 @@
                                 }
                                ")))))))
 
+; Not a test
 (deftest decoder
   (testing "decode"
-    (let [op (compile (parse (lex "println(\"helloworld\");")))]
+    (let [op (compile (parse (lex "for (int i = 9; i <= 21; i++) {  println(i); }")))]
       (println op)
       (decode-ops op))))
 
@@ -74,21 +75,56 @@
           "OK\n"
           (with-out-str
             (computer
-              (make-program-memory (compile (parse (lex "if (1) { println(\"OK\"); } else { println(\"NG\"); }"))))))))
+              (make-program-memory (compile (parse (lex "if (1) {
+                                                             println(\"OK\");
+                                                           } else {
+                                                             println(\"NG\");
+                                                           }"))))))))
     (is (=
           "OK\n"
           (with-out-str
             (computer
-              (make-program-memory (compile (parse (lex "if (0) { println(\"NG\"); } else { println(\"OK\"); }"))))))))
+              (make-program-memory (compile (parse (lex "if (0) {
+                                                             println(\"NG\");
+                                                           } else {
+                                                             println(\"OK\");
+                                                           }"))))))))
     (is (=
           "OK\n"
           (with-out-str
             (computer
-              (make-program-memory (compile (parse (lex "if (0) { println(\"NG\"); } else if (1) { println(\"OK\"); } else { println(\"NG\"); }"))))))))
+              (make-program-memory (compile (parse (lex "if (0) {
+                                                             println(\"NG\");
+                                                           } else if (1) {
+                                                             println(\"OK\");
+                                                           } else {
+                                                             println(\"NG\");
+                                                           }"))))))))
     (is (=
           "OK\n"
           (with-out-str
             (computer
-              (make-program-memory (compile (parse (lex "if (0) { println(\"NG\"); } else if (0) { println(\"NG\"); } else { println(\"OK\"); }"))))))))
+              (make-program-memory (compile (parse (lex "if (0) {
+                                                             println(\"NG\");
+                                                           } else if (0) {
+                                                             println(\"NG\");
+                                                           } else {
+                                                             println(\"OK\");
+                                                           }"))))))))
+    (is (=
+          "OK\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "if (0 <= 1) { println(\"OK\"); } else { println(\"NG\"); }"))))))))
+    (is (=
+          "OK\nOK\nOK\nOK\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "for (int i = 0; i <= 3; i++) {  println(\"OK\");  }"))))))))
+    (is (=
+          "9\n10\n11\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "for (int i = 9; i <= 11; i++) {  println(i);  }"))))))))
     )
   )

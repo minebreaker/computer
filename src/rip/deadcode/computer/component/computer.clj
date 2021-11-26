@@ -18,7 +18,7 @@
                        ro (ram in addr-memory l0)
                        _ (console in l1)
                        ]
-                   (mux16-4 ro false16 false16 false16 addr)
+                   (mux16-4 ro false16 false16 false16 [a13 false])
                    )
                  )
         ]
@@ -30,6 +30,14 @@
             [outM writeM addressM _ exit] (cpu instruction inM false)
             ]
         (memory outM addressM writeM)
+
+        ;(println (str "Mem "
+        ;           (ba2i (memory false16 zero16 false)) " "
+        ;           (ba2i (memory false16 one16 false)) " "
+        ;           (ba2i (memory false16 (i2ba 2) false)) " "
+        ;           (ba2i (memory false16 (i2ba 3) false)) " "
+        ;           (ba2i (memory false16 (i2ba 4) false))))
+
         (if (false? exit) (recur))
         )
       )
