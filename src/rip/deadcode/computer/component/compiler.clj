@@ -4,21 +4,6 @@
             [clojure.string :refer [blank? split]]
             [clojure.core.match :refer [match]]))
 
-; #include <stdio.h>;
-; int main() {
-;   for (i = 0; i <= 100; i++) {
-;     if (i % 15 == 0) {
-;       println("FizzBuzz");
-;     } else if (i % 5 == 0) {
-;       println("Buzz");
-;     } else if (i % 3 == 0) {
-;       println("Fizz");
-;     } else {
-;       println(i);
-;     }
-;   }
-; }
-
 (defn lex [^String code]
   (filter #(not (blank? %))
     (re-seq #"[\w\"]+|[\s\(\)\{\}\;]|\+\+|<=|==|=|%" code))
@@ -55,7 +40,8 @@
                          [(["}" "else" "{" & res] :seq)] (let [res' (parse res)]
                                                            (match [(:rest res')]
                                                              [(["}" & res''] :seq)] [res' res'']))
-                         [(["}" "else" "if" & _] :seq)] [(parse (drop 2 res-then')) nil])
+                         [(["}" "else" "if" & _] :seq)] (let [res' (parse (drop 2 res-then'))]
+                                                          [res' (:rest res')]))
         ]
     {:type "if"
      :cond res-cond
@@ -192,37 +178,38 @@
 (defn compile-rem [code var]
   (let [{x :x y :y z :z} code
         {offset :offset t-ptr :next-temp} var
-        [op-x] (-compile x (inc-temp (assoc var :offset offset)))
+        [op-x] (-compile x (inc-temp var))
         c-op-x (count op-x)
         [op-y] (-compile y (inc-temp (assoc var :offset (+ offset c-op-x 2))))
         c-op-y (count op-y)
         [op-y'] (-compile y (inc-temp (assoc var :offset (+ offset c-op-x 2 c-op-y 5)))) ; FIXME: this is dumb
         [op-z] (-compile z (inc-temp (assoc var :offset (+ offset c-op-x 2 c-op-y 5 c-op-y 1))))
         c-op-z (count op-z)]
-    [[; calculate remainder
-      op-x                                                  ; D=x
-      (a-inst (bit15 (i2ba t-ptr)))                         ; @t0
-      (c-inst true op-d op-dest-m)                          ; M=D ; t0=x ; rem-y
-      op-y                                                  ; D=y
-      (a-inst (bit15 (i2ba t-ptr)))                         ; @t0
-      (c-inst true op-a-d op-dest-md)                       ; MD=M-D ; x=x-y
-      (a-inst (bit15 (i2ba (+ offset c-op-x 3))))           ; @ point of op-y
-      (c-inst false op-d op-dest-null op-jge)               ; D,JGE ; repeat while x-y > 0
-      (a-inst (bit15 (i2ba t-ptr)))                         ; @t0
-      op-y'                                                 ; D=y
-      (c-inst true op-d+a op-dest-m)                        ; M=D+M ; t0=(rem-y)+y
-      ; check if rem equals to z
-      op-z                                                  ; D=z
-      (a-inst (bit15 (i2ba t-ptr)))                         ; @t0
-      (c-inst true op-d-a op-dest-null op-jeq)              ; D=D-M,JEQ
-      (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 5 c-op-y 1 c-op-z 8))))
-      (c-inst false op-d op-dest-null op-jeq)               ; D,JEQ ; jump if rem-z = 0
-      (c-inst op-0 op-dest-d)                               ; D=0 ; when rem != z
-      (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 5 c-op-y 1 c-op-z 9))))
-      (c-inst false op-0 op-dest-null op-jmp)               ; JMP ; jump to last
-      (c-inst op-1 op-dest-d)                               ; D=1 ; when rem = z
-      (c-inst op-d op-dest-d)                               ; D
-      ]
+    [(vec (concat
+            ; calculate remainder
+            op-x                                            ; D=x
+            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+             (c-inst true op-d op-dest-m)                   ; M=D ; t0=x ; rem-y
+             ]
+            op-y                                            ; D=y
+            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+             (c-inst true op-a-d op-dest-md)                ; MD=M-D ; x=x-y
+             (a-inst (bit15 (i2ba (+ offset c-op-x 2))))    ; @ point of op-y
+             (c-inst false op-d op-dest-null op-jge)        ; D,JGE ; repeat while x-y >= 0
+             ]
+            op-y'                                           ; D=y
+            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+             (c-inst true op-d+a op-dest-m)]                ; M=D+M ; t0=(rem-y)+y
+            ; check if rem equals to z
+            op-z                                            ; D=z
+            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+             (c-inst true op-d-a op-dest-d)                 ; D=D-M ; z-rem
+             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 6))))
+             (c-inst false op-d op-dest-null op-jeq)        ; D,JEQ ; jump if rem=z
+             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 7))))
+             (c-inst false op-0 op-dest-d op-jmp)           ; D=0,JMP ; when rem != z jump to last
+             (c-inst op-1 op-dest-d)                        ; D=1 ; when rem=z
+             ]))
      var]
     )
   )

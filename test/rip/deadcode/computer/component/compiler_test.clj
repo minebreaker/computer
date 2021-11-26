@@ -58,7 +58,7 @@
 ; Not a test
 (deftest decoder
   (testing "decode"
-    (let [op (compile (parse (lex "for (int i = 9; i <= 21; i++) {  println(i); }")))]
+    (let [op (compile (parse (lex "if (5 % 3 == 0) {\n                                                           println(\"NG\");\n                                                         } else {\n                                                           println(\"OK\");\n                                                         }")))]
       (println op)
       (decode-ops op))))
 
@@ -76,19 +76,37 @@
           (with-out-str
             (computer
               (make-program-memory (compile (parse (lex "if (1) {
-                                                             println(\"OK\");
-                                                           } else {
-                                                             println(\"NG\");
-                                                           }"))))))))
+                                                           println(\"OK\");
+                                                         } else {
+                                                           println(\"NG\");
+                                                         }"))))))))
     (is (=
           "OK\n"
           (with-out-str
             (computer
               (make-program-memory (compile (parse (lex "if (0) {
-                                                             println(\"NG\");
-                                                           } else {
-                                                             println(\"OK\");
-                                                           }"))))))))
+                                                           println(\"NG\");
+                                                         } else {
+                                                           println(\"OK\");
+                                                         }"))))))))
+    (is (=
+          "OK\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "if (4 % 2 == 0) {
+                                                           println(\"OK\");
+                                                         } else {
+                                                           println(\"NG\");
+                                                         }"))))))))
+    (is (=
+          "OK\n"
+          (with-out-str
+            (computer
+              (make-program-memory (compile (parse (lex "if (5 % 3 == 0) {
+                                                           println(\"NG\");
+                                                         } else {
+                                                           println(\"OK\");
+                                                         }"))))))))
     (is (=
           "OK\n"
           (with-out-str
@@ -105,12 +123,12 @@
           (with-out-str
             (computer
               (make-program-memory (compile (parse (lex "if (0) {
-                                                             println(\"NG\");
-                                                           } else if (0) {
-                                                             println(\"NG\");
-                                                           } else {
-                                                             println(\"OK\");
-                                                           }"))))))))
+                                                           println(\"NG\");
+                                                         } else if (0) {
+                                                           println(\"NG\");
+                                                         } else {
+                                                           println(\"OK\");
+                                                         }"))))))))
     (is (=
           "OK\n"
           (with-out-str
