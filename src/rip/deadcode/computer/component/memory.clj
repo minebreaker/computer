@@ -105,6 +105,6 @@
           zero16
           zero16
           in
-          (inc16 (r false16 false))
+          (inc16bit (r false16 false))
           [(or inc (not load)) (not reset)])
         (or (or load inc) reset)))))

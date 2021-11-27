@@ -25,40 +25,40 @@
   (testing "adder16"
     (is (=
           [zero16 false]
-          (adder16 zero16 zero16 false)))
+          (adder16bit zero16 zero16 false)))
     (is (=
           [one16 false]
-          (adder16 zero16 zero16 true)))
+          (adder16bit zero16 zero16 true)))
     (is (=
           [one16 false]
-          (adder16 zero16 one16 false)))
+          (adder16bit zero16 one16 false)))
     (is (=
           [one16 false]
-          (adder16 one16 zero16 false)))
+          (adder16bit one16 zero16 false)))
     (is (=
           [(i2ba 2) false]
-          (adder16 zero16 one16 true)))
+          (adder16bit zero16 one16 true)))
     (is (=
           [(i2ba 2) false]
-          (adder16 one16 zero16 true)))
+          (adder16bit one16 zero16 true)))
     (is (=
           [(i2ba 3) false]
-          (adder16 one16 one16 true)))
+          (adder16bit one16 one16 true)))
     (is (=
           [m-one16 false]
-          (adder16 zero16 m-one16 false)))
+          (adder16bit zero16 m-one16 false)))
     (is (=
           [m-one16 false]
-          (adder16 m-one16 zero16 false)))
+          (adder16bit m-one16 zero16 false)))
     (is (=
           [(i2ba -2) true]
-          (adder16 m-one16 m-one16 false)))))
+          (adder16bit m-one16 m-one16 false)))))
 
 (deftest inc16-test
   (testing "inc16"
-    (is (= one16 (inc16 zero16)))
-    (is (= (i2ba 2) (inc16 one16)))
-    (is (= max16 (inc16 (i2ba 32766))))))
+    (is (= one16 (inc16bit zero16)))
+    (is (= (i2ba 2) (inc16bit one16)))
+    (is (= max16 (inc16bit (i2ba 32766))))))
 
 (deftest alu-test
   (testing "alu 0"

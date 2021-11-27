@@ -16,7 +16,7 @@
         [s1 c1] (half-adder s0 cin)]
     [s1 (or c0 c1)]))
 
-(defn adder16 [x y cin]
+(defn adder16bit [x y cin]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y
         [s0 c0] (full-adder x0 y0 cin)
@@ -38,8 +38,8 @@
         ]
     [[s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 s12 s13 s14 s15] c15]))
 
-(defn inc16 [in]
-  (let [[result] (adder16 in [true false false false false false false false false false false false false false false false] false)]
+(defn inc16bit [in]
+  (let [[result] (adder16bit in [true false false false false false false false false false false false false false false false] false)]
     result))
 
 (defn alu [x y zx nx zy ny f no rs]
@@ -65,7 +65,7 @@
         x-negate (xor16bit x-zero (expand16 nx))
         y-negate (xor16bit y-zero (expand16 ny))
 
-        [radd] (adder16 x-negate y-negate false)
+        [radd] (adder16bit x-negate y-negate false)
         rand (and16bit x-negate y-negate)
         out-added (mux16bit rand radd f)
         out-negated (xor16bit out-added (expand16 no))
