@@ -14,9 +14,8 @@
 
 (deftest program-memory-test
   (testing "works fine"
-    (let [
-          op0 (a-inst (bit15 (i2ba 10)))                    ; @10
-          op1 (c-inst false op-a+1 op-dest-d op-no-jump) ; D=A+1
+    (let [op0 (a-inst (bit15 (i2ba 10)))                    ; @10
+          op1 (c-inst false op-a+1 op-dest-d op-no-jump)    ; D=A+1
           pm (make-program-memory [op0 op1])
           ]
       (is (= op0 (pm (i2ba 0))))

@@ -41,7 +41,6 @@
 (def two15 (bit15 two16))
 (def three15 (bit15 three16))
 
-
 (def dont-care false16)                                     ; just a convention
 
 ; comp mnemonics
