@@ -27,7 +27,7 @@
             ro5 (r5 in l5)
             ro6 (r6 in l6)
             ro7 (r7 in l7)]
-        (mux16-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
+        (mux16bit-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
 
 (defn make-ram64 []
   (let [r0 (make-ram8) r1 (make-ram8) r2 (make-ram8) r3 (make-ram8)
@@ -45,7 +45,7 @@
             ro5 (r5 in addr-8 l5)
             ro6 (r6 in addr-8 l6)
             ro7 (r7 in addr-8 l7)]
-        (mux16-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
+        (mux16bit-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
 
 (defn make-ram512 []
   (let [r0 (make-ram64) r1 (make-ram64) r2 (make-ram64) r3 (make-ram64)
@@ -63,7 +63,7 @@
             ro5 (r5 in addr-64 l5)
             ro6 (r6 in addr-64 l6)
             ro7 (r7 in addr-64 l7)]
-        (mux16-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
+        (mux16bit-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
 
 (defn make-ram4k []
   (let [r0 (make-ram512) r1 (make-ram512) r2 (make-ram512) r3 (make-ram512)
@@ -81,7 +81,7 @@
             ro5 (r5 in addr-512 l5)
             ro6 (r6 in addr-512 l6)
             ro7 (r7 in addr-512 l7)]
-        (mux16-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
+        (mux16bit-8 ro0 ro1 ro2 ro3 ro4 ro5 ro6 ro7 addr)))))
 
 (defn make-ram16k []
   (let [r0 (make-ram4k) r1 (make-ram4k) r2 (make-ram4k) r3 (make-ram4k)]
@@ -94,14 +94,14 @@
             ro1 (r1 in addr-16k l1)
             ro2 (r2 in addr-16k l2)
             ro3 (r3 in addr-16k l3)]
-        (mux16-4 ro0 ro1 ro2 ro3 addr)))))
+        (mux16bit-4 ro0 ro1 ro2 ro3 addr)))))
 
 (defn make-pc []
   "program counter"
   (let [r (make-register16)]
     (fn [in inc load reset]
       (r
-        (mux16-4
+        (mux16bit-4
           zero16
           zero16
           in

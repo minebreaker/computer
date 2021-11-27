@@ -15,7 +15,7 @@
 
 (deftest not16-16-test
   (testing "not16-16"
-    (is (= m-one16 (not16-16 zero16)))))
+    (is (= m-one16 (not16bit zero16)))))
 
 (deftest and-test
   (testing "and"
@@ -26,10 +26,10 @@
 
 (deftest and16-16-test
   (testing "and16-16"
-    (is (= zero16 (and16-16 zero16 zero16)))
-    (is (= zero16 (and16-16 zero16 m-one16)))
-    (is (= zero16 (and16-16 m-one16 zero16)))
-    (is (= m-one16 (and16-16 m-one16 m-one16)))))
+    (is (= zero16 (and16bit zero16 zero16)))
+    (is (= zero16 (and16bit zero16 m-one16)))
+    (is (= zero16 (and16bit m-one16 zero16)))
+    (is (= m-one16 (and16bit m-one16 m-one16)))))
 
 (deftest or-test
   (testing "or"
@@ -40,17 +40,17 @@
 
 (deftest or16-16-test
   (testing "or16-16"
-    (is (= zero16 (or16-16 zero16 zero16)))
-    (is (= m-one16 (or16-16 zero16 m-one16)))
-    (is (= m-one16 (or16-16 m-one16 zero16)))
-    (is (= m-one16 (or16-16 m-one16 m-one16)))))
+    (is (= zero16 (or16bit zero16 zero16)))
+    (is (= m-one16 (or16bit zero16 m-one16)))
+    (is (= m-one16 (or16bit m-one16 zero16)))
+    (is (= m-one16 (or16bit m-one16 m-one16)))))
 
 (deftest or16-1-test
   (testing "or16-1"
-    (is (= false (or16-1 zero16)))
-    (is (= true (or16-1 [false false false false false false false false false false false false false false false true])))
-    (is (= true (or16-1 [true false false false false false false false false false false false false false false false])))
-    (is (= true (or16-1 m-one16)))))
+    (is (= false (or16 zero16)))
+    (is (= true (or16 [false false false false false false false false false false false false false false false true])))
+    (is (= true (or16 [true false false false false false false false false false false false false false false false])))
+    (is (= true (or16 m-one16)))))
 
 (deftest xor-test
   (testing "xor"
@@ -61,10 +61,10 @@
 
 (deftest xor16-16-test
   (testing "xor16-16"
-    (is (= zero16 (xor16-16 zero16 zero16)))
-    (is (= m-one16 (xor16-16 zero16 m-one16)))
-    (is (= m-one16 (xor16-16 m-one16 zero16)))
-    (is (= zero16 (xor16-16 m-one16 m-one16)))))
+    (is (= zero16 (xor16bit zero16 zero16)))
+    (is (= m-one16 (xor16bit zero16 m-one16)))
+    (is (= m-one16 (xor16bit m-one16 zero16)))
+    (is (= zero16 (xor16bit m-one16 m-one16)))))
 
 (deftest mux-test
   (testing "mux"
@@ -79,14 +79,14 @@
 
 (deftest mux16-test
   (testing "mux16"
-    (is (= zero16 (mux16 zero16 zero16 false)))
-    (is (= m-one16 (mux16 m-one16 zero16 false)))
-    (is (= zero16 (mux16 zero16 m-one16 false)))
-    (is (= m-one16 (mux16 m-one16 m-one16 false)))
-    (is (= zero16 (mux16 zero16 zero16 true)))
-    (is (= zero16 (mux16 m-one16 zero16 true)))
-    (is (= m-one16 (mux16 zero16 m-one16 true)))
-    (is (= m-one16 (mux16 m-one16 m-one16 true)))))
+    (is (= zero16 (mux16bit zero16 zero16 false)))
+    (is (= m-one16 (mux16bit m-one16 zero16 false)))
+    (is (= zero16 (mux16bit zero16 m-one16 false)))
+    (is (= m-one16 (mux16bit m-one16 m-one16 false)))
+    (is (= zero16 (mux16bit zero16 zero16 true)))
+    (is (= zero16 (mux16bit m-one16 zero16 true)))
+    (is (= m-one16 (mux16bit zero16 m-one16 true)))
+    (is (= m-one16 (mux16bit m-one16 m-one16 true)))))
 
 (deftest mux8-test
   (testing "mux8"
@@ -102,15 +102,15 @@
 
 (deftest mux16-8-test
   (testing "mux16-8"
-    (is (= false16 (mux16-8 false16 false16 false16 false16 false16 false16 false16 false16 [false false false])))
-    (is (= true16 (mux16-8 true16 false16 false16 false16 false16 false16 false16 false16 [false false false])))
-    (is (= true16 (mux16-8 false16 true16 false16 false16 false16 false16 false16 false16 [true false false])))
-    (is (= true16 (mux16-8 false16 false16 true16 false16 false16 false16 false16 false16 [false true false])))
-    (is (= true16 (mux16-8 false16 false16 false16 true16 false16 false16 false16 false16 [true true false])))
-    (is (= true16 (mux16-8 false16 false16 false16 false16 true16 false16 false16 false16 [false false true])))
-    (is (= true16 (mux16-8 false16 false16 false16 false16 false16 true16 false16 false16 [true false true])))
-    (is (= true16 (mux16-8 false16 false16 false16 false16 false16 false16 true16 false16 [false true true])))
-    (is (= true16 (mux16-8 false16 false16 false16 false16 false16 false16 false16 true16 [true true true])))))
+    (is (= false16 (mux16bit-8 false16 false16 false16 false16 false16 false16 false16 false16 [false false false])))
+    (is (= true16 (mux16bit-8 true16 false16 false16 false16 false16 false16 false16 false16 [false false false])))
+    (is (= true16 (mux16bit-8 false16 true16 false16 false16 false16 false16 false16 false16 [true false false])))
+    (is (= true16 (mux16bit-8 false16 false16 true16 false16 false16 false16 false16 false16 [false true false])))
+    (is (= true16 (mux16bit-8 false16 false16 false16 true16 false16 false16 false16 false16 [true true false])))
+    (is (= true16 (mux16bit-8 false16 false16 false16 false16 true16 false16 false16 false16 [false false true])))
+    (is (= true16 (mux16bit-8 false16 false16 false16 false16 false16 true16 false16 false16 [true false true])))
+    (is (= true16 (mux16bit-8 false16 false16 false16 false16 false16 false16 true16 false16 [false true true])))
+    (is (= true16 (mux16bit-8 false16 false16 false16 false16 false16 false16 false16 true16 [true true true])))))
 
 (deftest dmux-test
   (testing "dmux"

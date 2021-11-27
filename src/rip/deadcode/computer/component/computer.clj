@@ -18,7 +18,7 @@
                        ro (ram in addr-memory l0)
                        _ (console in l1)
                        ]
-                   (mux16-4 ro false16 false16 false16 [a13 false])
+                   (mux16bit-4 ro false16 false16 false16 [a13 false])
                    )
                  )
         ]

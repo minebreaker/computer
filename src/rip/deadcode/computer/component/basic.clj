@@ -4,9 +4,7 @@
 (defn not [x]
   (nand x x))
 
-; TODO: strict naming convention between "bit" and "way"
-
-(defn not16-16 [in]
+(defn not16bit [in]
   (let [[in0 in1 in2 in3 in4 in5 in6 in7 in8 in9 in10 in11 in12 in13 in14 in15] in]
     [(not in0) (not in1) (not in2) (not in3) (not in4) (not in5) (not in6) (not in7)
      (not in8) (not in9) (not in10) (not in11) (not in12) (not in13) (not in14) (not in15)]))
@@ -18,7 +16,7 @@
 
 (defn and4 [a b c d] (and (and a b) (and c d)))
 
-(defn and16-16 [x y]
+(defn and16bit [x y]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y]
     [(and x0 y0) (and x1 y1) (and x2 y2) (and x3 y3) (and x4 y4) (and x5 y5) (and x6 y6) (and x7 y7)
@@ -29,32 +27,30 @@
 
 (defn or3 [x y z] (or x (or y z)))
 
-(defn or16-16 [x y]
+(defn or4 [x0 x1 x2 x3]
+  (or (or x0 x1) (or x2 x3)))
+
+(defn or8 [x0 x1 x2 x3 x4 x5 x6 x7]
+  (or
+    (or4 x0 x1 x2 x3)
+    (or4 x4 x5 x6 x7)))
+
+(defn or16 [x]
+  (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x]
+    (or
+      (or8 x0 x1 x2 x3 x4 x5 x6 x7)
+      (or8 x8 x9 x10 x11 x12 x13 x14 x15))))
+
+(defn or16bit [x y]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y]
     [(or x0 y0) (or x1 y1) (or x2 y2) (or x3 y3) (or x4 y4) (or x5 y5) (or x6 y6) (or x7 y7)
      (or x8 y8) (or x9 y9) (or x10 y10) (or x11 y11) (or x12 y12) (or x13 y13) (or x14 y14) (or x15 y15)]))
 
-(defn or4-1 [x]
-  (let [[x0 x1 x2 x3] x]
-    (or (or x0 x1) (or x2 x3))))
-
-(defn or8-1 [x]
-  (let [[x0 x1 x2 x3 x4 x5 x6 x7] x]
-    (or
-      (or (or x0 x1) (or x2 x3))
-      (or (or x4 x5) (or x6 x7)))))
-
-(defn or16-1 [x]
-  (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x]
-    (or
-      (or8-1 [x0 x1 x2 x3 x4 x5 x6 x7])
-      (or8-1 [x8 x9 x10 x11 x12 x13 x14 x15]))))
-
 (defn xor [x y]
   (and (or x y) (nand x y)))
 
-(defn xor16-16 [x y]
+(defn xor16bit [x y]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y]
     [(xor x0 y0) (xor x1 y1) (xor x2 y2) (xor x3 y3) (xor x4 y4) (xor x5 y5) (xor x6 y6) (xor x7 y7)
@@ -65,7 +61,27 @@
     (and x (not select))
     (and y select)))
 
-(defn mux16 [x y select]
+(defn mux4 [a b c d select]
+  (let [[s0 s1] select]
+    (or4
+      (and3 a (not s0) (not s1))
+      (and3 b s0 (not s1))
+      (and3 c (not s0) s1)
+      (and3 d s0 s1))))
+
+(defn mux8 [a b c d e f g h select]
+  (let [[s0 s1 s2] select]
+    (or8
+      (and4 a (not s0) (not s1) (not s2))
+      (and4 b s0 (not s1) (not s2))
+      (and4 c (not s0) s1 (not s2))
+      (and4 d s0 s1 (not s2))
+      (and4 e (not s0) (not s1) s2)
+      (and4 f s0 (not s1) s2)
+      (and4 g (not s0) s1 s2)
+      (and4 h s0 s1 s2))))
+
+(defn mux16bit [x y select]
   (let [[x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15] x
         [y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15] y]
     [(mux x0 y0 select) (mux x1 y1 select) (mux x2 y2 select) (mux x3 y3 select)
@@ -73,27 +89,7 @@
      (mux x8 y8 select) (mux x9 y9 select) (mux x10 y10 select) (mux x11 y11 select)
      (mux x12 y12 select) (mux x13 y13 select) (mux x14 y14 select) (mux x15 y15 select)]))
 
-(defn mux4 [a b c d select]
-  (let [[s0 s1] select]
-    (or4-1
-      [(and3 a (not s0) (not s1))
-       (and3 b s0 (not s1))
-       (and3 c (not s0) s1)
-       (and3 d s0 s1)])))
-
-(defn mux8 [a b c d e f g h select]
-  (let [[s0 s1 s2] select]
-    (or8-1
-      [(and4 a (not s0) (not s1) (not s2))
-       (and4 b s0 (not s1) (not s2))
-       (and4 c (not s0) s1 (not s2))
-       (and4 d s0 s1 (not s2))
-       (and4 e (not s0) (not s1) s2)
-       (and4 f s0 (not s1) s2)
-       (and4 g (not s0) s1 s2)
-       (and4 h s0 s1 s2)])))
-
-(defn mux16-4 [a b c d select]
+(defn mux16bit-4 [a b c d select]
   (let [[a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] a
         [b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 b14 b15] b
         [c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15] c
@@ -115,7 +111,7 @@
      (mux4 a14 b14 c14 d14 select)
      (mux4 a15 b15 c15 d15 select)]))
 
-(defn mux16-8 [a b c d e f g h select]
+(defn mux16bit-8 [a b c d e f g h select]
   (let [[a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] a
         [b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 b14 b15] b
         [c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15] c
@@ -153,8 +149,7 @@
      (and3 in s0 s1)]))
 
 (defn dmux8 [in select]
-  (let [[s0 s1 s2] select
-        and4 (fn [i0 i1 i2 i3] (and (and i0 i1) (and i2 i3)))]
+  (let [[s0 s1 s2] select]
     [(and4 in (not s0) (not s1) (not s2))
      (and4 in s0 (not s1) (not s2))
      (and4 in (not s0) s1 (not s2))

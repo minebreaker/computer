@@ -39,13 +39,13 @@
 
         [outM zr ng] (alu
                        d-current
-                       (mux16 a-current inM a)              ; if comp-a == true inM else A-register
+                       (mux16bit a-current inM a)              ; if comp-a == true inM else A-register
                        c1 c2 c3 c4 c5 c6
                        e)
 
 
         _ (a-register
-            (mux16 [v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 false] outM instruction-type)
+            (mux16bit [v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 false] outM instruction-type)
             (and
               (or (not instruction-type) d1)
               (not disable-loading)))

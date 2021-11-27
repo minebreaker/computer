@@ -60,19 +60,19 @@
     ng true when out < 0
   "
   (let [
-        x-zero (and16-16 x (expand16 (not zx)))
-        y-zero (and16-16 y (expand16 (not zy)))
-        x-negate (xor16-16 x-zero (expand16 nx))
-        y-negate (xor16-16 y-zero (expand16 ny))
+        x-zero (and16bit x (expand16 (not zx)))
+        y-zero (and16bit y (expand16 (not zy)))
+        x-negate (xor16bit x-zero (expand16 nx))
+        y-negate (xor16bit y-zero (expand16 ny))
 
         [radd] (adder16 x-negate y-negate false)
-        rand (and16-16 x-negate y-negate)
-        out-added (mux16 rand radd f)
-        out-negated (xor16-16 out-added (expand16 no))
+        rand (and16bit x-negate y-negate)
+        out-added (mux16bit rand radd f)
+        out-negated (xor16bit out-added (expand16 no))
         out (let [[_ v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15] out-negated
                   shifted [v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 false]]
-              (mux16 out-negated shifted rs))
-        zr (not (or16-1 out))
+              (mux16bit out-negated shifted rs))
+        zr (not (or16 out))
         ng (nth out 15)]                                    ; it's ok to use nth as long as the index is a constant
 
     ;(println "========")
