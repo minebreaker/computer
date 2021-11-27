@@ -66,10 +66,7 @@
         [radd] (adder16bit x-negate y-negate false)
         rand (and16bit x-negate y-negate)
         out-added (mux16bit rand radd f)
-        out-negated (xor16bit out-added (expand16 no))
-        out (let [[_ v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15] out-negated
-                  shifted [v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 false]]
-              (mux16bit out-negated shifted rs))
+        out (xor16bit out-added (expand16 no))
         zr (not (or16 out))
         ng (nth out 15)]                                    ; it's ok to use nth as long as the index is a constant
 

@@ -147,7 +147,4 @@
     (is (= [false16 true false] (alu false16 false16 false true false true false true false)))
     (is (= [true16 false true] (alu false16 true16 false true false true false true false)))
     (is (= [true16 false true] (alu true16 false16 false true false true false true false)))
-    (is (= [true16 false true] (alu true16 true16 false true false true false true false))))
-  (testing "alu out>>1"
-    (is (= [(i2ba 8) false false] (alu (i2ba 7) (i2ba 9) false false false false true false true))) ; (7 + 9) >> 1
-    (is (= [(i2ba 64) false false] (alu (i2ba 128) (i2ba 64) false true false false true true false))))) ; (128 - 64) >> 1
+    (is (= [true16 false true] (alu true16 true16 false true false true false true false)))))
