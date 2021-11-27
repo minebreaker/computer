@@ -1,6 +1,5 @@
 (ns rip.deadcode.computer.component.computer
-  (:require [rip.deadcode.computer.component.primitive :refer :all]
-            [rip.deadcode.computer.component.basic :refer :all]
+  (:require [rip.deadcode.computer.component.basic :refer :all]
             [rip.deadcode.computer.component.memory :refer :all]
             [rip.deadcode.computer.component.processor :refer :all]
             [rip.deadcode.computer.component.hardware :refer :all]
