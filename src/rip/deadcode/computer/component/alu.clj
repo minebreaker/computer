@@ -5,9 +5,7 @@
 
 (defn half-adder [x y]
   "@returns [sum carry]"
-  [(or
-     (and x (not y))
-     (and (not x) y))
+  [(xor x y)
    (and x y)])
 
 (defn full-adder [x y cin]
