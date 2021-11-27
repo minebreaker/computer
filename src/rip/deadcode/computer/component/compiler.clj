@@ -1,6 +1,5 @@
 (ns rip.deadcode.computer.component.compiler
   (:require [rip.deadcode.computer.component.extensional :refer :all]
-            [rip.deadcode.computer.component.hardware :refer [console-idx]]
             [clojure.string :refer [blank? split]]
             [clojure.core.match :refer [match]]))
 

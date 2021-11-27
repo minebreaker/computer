@@ -1,7 +1,7 @@
 (ns rip.deadcode.computer.component.hardware-test
   (:require [clojure.test :refer :all]
-            [rip.deadcode.computer.component.extensional :refer :all]
-            [rip.deadcode.computer.component.hardware :refer :all]))
+            [rip.deadcode.computer.component.hardware :refer :all]
+            [rip.deadcode.computer.component.extensional :refer :all]))
 
 (deftest console-test
   (testing "console output"

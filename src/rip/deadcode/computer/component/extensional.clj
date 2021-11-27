@@ -1,5 +1,4 @@
-(ns rip.deadcode.computer.component.extensional
-  (:require [rip.deadcode.computer.component.primitive :refer [nand]]))
+(ns rip.deadcode.computer.component.extensional)
 
 ; Functions to cooperate with Hardware-world and Clojure world
 ; Also contains some utility functions for readability
@@ -42,6 +41,10 @@
 (def three15 (bit15 three16))
 
 (def dont-care false16)                                     ; just a convention
+
+(defn i2s [i] "Converts given int code point to String" (new String (Character/toChars i)))
+(defn s2ba [s] "Converts a first letter of given string to bytes" (i2ba (int (nth s 0))))
+(def console-idx (bit15 (i2ba 16384)))
 
 ; comp mnemonics
 (def op-0 [true false true false true false])

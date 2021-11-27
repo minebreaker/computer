@@ -1,7 +1,6 @@
 (ns rip.deadcode.computer.component.debug
-  (:require [rip.deadcode.computer.component.hardware :refer :all]
-            [rip.deadcode.computer.component.extensional :refer :all]
-            [clojure.core.match :refer [match]]))
+  (:require [clojure.core.match :refer [match]]
+            [rip.deadcode.computer.component.extensional :refer :all]))
 
 
 (defn decode [[i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15]]
