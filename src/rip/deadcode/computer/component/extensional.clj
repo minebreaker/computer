@@ -86,9 +86,16 @@
 (def op-jle [true true false])
 (def op-jmp [true true true])
 
-(defn a-inst [bits]
+(defn a-inst [in]
   "Creates a-instruction from bool array[15]"
-  (into [false] bits))
+  (into [false]
+    (cond
+      (int? in) (bit15 (i2ba in))
+      (string? in) (bit15 (s2ba in))
+      (= 15 (count in)) in                                  ; bit array[15]
+      (= 16 (count in)) (bit15 in))                         ; bit array[16]
+    )
+  )
 
 (defn c-inst
   "Creates c-instruction from extension-code, a-code, comp[6], dest[3], jump[3]"

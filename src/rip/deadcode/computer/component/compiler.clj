@@ -79,14 +79,14 @@
     [(vec (concat
             op-value                                        ; D=value
             [
-             (a-inst (bit15 (i2ba ptr)))                    ; @ptr
+             (a-inst ptr)                                   ; @ptr
              (c-inst op-d op-dest-m)                        ; M=D
              ]))
      (merge var {:local (merge local {name ptr}) :next-local (inc ptr)})])
   )
 
 (defn compile-int [code]
-  [(a-inst (bit15 (i2ba (:value code))))                    ; @i
+  [(a-inst (:value code))                                   ; @i
    (c-inst false op-a op-dest-d op-no-jump)                 ; D=A
    ])
 
@@ -95,9 +95,9 @@
         str (:value code)
         str-len (.length str)
         out-code (merge [
-                         (a-inst (bit15 (i2ba str-len)))    ; @length of the str
+                         (a-inst str-len)                   ; @length of the str
                          (c-inst false op-a op-dest-d)      ; D=A
-                         (a-inst (bit15 (i2ba obj-ptr)))    ; @obj-pt
+                         (a-inst obj-ptr)                   ; @obj-pt
                          (c-inst false op-d op-dest-m)      ; M=D
                          ]
                    (vec (map-indexed                        ; for each char
@@ -105,15 +105,15 @@
                             [
                              (a-inst obj-ptr)               ; @obj-ptr
                              (c-inst false op-a op-dest-d)  ; D=A
-                             (a-inst (bit15 (i2ba t-ptr)))  ; @0
+                             (a-inst t-ptr)                 ; @0
                              (c-inst true op-d op-dest-m)   ; M=D ; t0 = obj-ptr
-                             (a-inst (bit15 (i2ba (+ n 1)))) ; @(n+1)
+                             (a-inst (+ n 1))               ; @(n+1)
                              (c-inst false op-a op-dest-d)  ; D=A
-                             (a-inst (bit15 (i2ba t-ptr)))  ; @0
+                             (a-inst t-ptr)                 ; @0
                              (c-inst true op-d+a op-dest-m) ; M=M+D ; t0 = obj-ptr + n
-                             (a-inst (bit15 (i2ba (int c)))) ; @char
+                             (a-inst (int c))               ; @char
                              (c-inst false op-a op-dest-d)  ; D=A
-                             (a-inst (bit15 (i2ba t-ptr)))  ; @0
+                             (a-inst t-ptr)                 ; @0
                              (c-inst true op-a op-dest-a)   ; A=M ; A = t0
                              (c-inst true op-d op-dest-m)   ; M=D ; [t0] = char
                              ])
@@ -133,7 +133,7 @@
 (defn compile-ref [code var]
   (let [ptr (get (:local var) (:name code))]
     [[
-      (a-inst (bit15 (i2ba (int ptr))))                     ; @ptr
+      (a-inst ptr)                                          ; @ptr
       (c-inst true op-a op-dest-d op-no-jump)               ; D=M
       ]
      var]))
@@ -150,15 +150,15 @@
         c-op-y (count op-y)]
     [(vec (concat
             op-x                                            ; D=x
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst false op-d op-dest-m)                  ; M=D ; t0=x
              ]
             op-y                                            ; D=y
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst true op-a-d op-dest-d)                 ; D=M-D ; x-y
-             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 6))))
+             (a-inst (+ offset c-op-x 2 c-op-y 6))
              (c-inst false op-d op-dest-null op-jle)        ; D,JLE ; jump if x-y <= 0
-             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 7))))
+             (a-inst (+ offset c-op-x 2 c-op-y 7))
              (c-inst false op-0 op-dest-d op-jmp)           ; D=0,JMP ; false when x-y > 0 jump to last
              (c-inst false op-1 op-dest-d)                  ; D=1 ; true when x-y <= 0
              (c-inst op-d op-dest-null)                     ; D ; TODO: can be shorten
@@ -169,7 +169,7 @@
 (defn compile-inc [code var]
   (let [{name :name} code
         ptr (get (:local var) name)]
-    [[(a-inst (bit15 (i2ba ptr)))                           ; @ptr
+    [[(a-inst ptr)                                          ; @ptr
       (c-inst true op-a+1 op-dest-md)                       ; MD=M+1
       ]
      var]))
@@ -187,25 +187,25 @@
     [(vec (concat
             ; calculate remainder
             op-x                                            ; D=x
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst true op-d op-dest-m)                   ; M=D ; t0=x ; rem-y
              ]
             op-y                                            ; D=y
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst true op-a-d op-dest-md)                ; MD=M-D ; x=x-y
-             (a-inst (bit15 (i2ba (+ offset c-op-x 2))))    ; @ point of op-y
+             (a-inst (+ offset c-op-x 2))                   ; @ point of op-y
              (c-inst false op-d op-dest-null op-jge)        ; D,JGE ; repeat while x-y >= 0
              ]
             op-y'                                           ; D=y
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst true op-d+a op-dest-m)]                ; M=D+M ; t0=(rem-y)+y
             ; check if rem equals to z
             op-z                                            ; D=z
-            [(a-inst (bit15 (i2ba t-ptr)))                  ; @t0
+            [(a-inst t-ptr)                                 ; @t0
              (c-inst true op-d-a op-dest-d)                 ; D=D-M ; z-rem
-             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 6))))
+             (a-inst (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 6))
              (c-inst false op-d op-dest-null op-jeq)        ; D,JEQ ; jump if rem=z
-             (a-inst (bit15 (i2ba (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 7))))
+             (a-inst (+ offset c-op-x 2 c-op-y 4 c-op-y 2 c-op-z 7))
              (c-inst false op-0 op-dest-d op-jmp)           ; D=0,JMP ; when rem != z jump to last
              (c-inst op-1 op-dest-d)                        ; D=1 ; when rem=z
              ]))
@@ -222,41 +222,41 @@
     [(cond
        (= name "println") (let [write-int (fn [add-offset]
                                             [; assuming  D=x
-                                             (a-inst (bit15 (i2ba t0-ptr))) ; @t0
+                                             (a-inst t0-ptr) ; @t0
                                              (c-inst true op-d op-dest-m) ; M=D ; t0=x ; rem-y
-                                             (a-inst (bit15 (i2ba t1-ptr))) ; @t1 ; q
+                                             (a-inst t1-ptr) ; @t1 ; q
                                              (c-inst false op--1 op-dest-m) ; M=-1 ; t1=-1 ; quotient
-                                             (a-inst (bit15 (i2ba t1-ptr))) ; @t1
+                                             (a-inst t1-ptr) ; @t1
                                              (c-inst true op-a+1 op-dest-m) ; M=M+1 ; increment q
-                                             (a-inst (bit15 (i2ba 10))) ; @10
+                                             (a-inst 10)    ; @10
                                              (c-inst op-a op-dest-d) ; D=A ; D=10
-                                             (a-inst (bit15 (i2ba t0-ptr))) ; @t0
+                                             (a-inst t0-ptr) ; @t0
                                              (c-inst true op-a-d op-dest-md) ; MD=M-D ; x=x-10
-                                             (a-inst (bit15 (i2ba (+ offset add-offset 4))))
+                                             (a-inst (+ offset add-offset 4))
                                              (c-inst false op-d op-dest-null op-jge) ; D,JGE ; repeat while x-10 >= 0
-                                             (a-inst (bit15 (i2ba 10))) ; @10
+                                             (a-inst 10)    ; @10
                                              (c-inst op-a op-dest-d) ; D=A
-                                             (a-inst (bit15 (i2ba t0-ptr))) ; @t0
+                                             (a-inst t0-ptr) ; @t0
                                              (c-inst true op-d+a op-dest-m) ; M=D+M ; t0=(rem-y)+y
                                              ; prints second digit if not 0
-                                             (a-inst (bit15 (i2ba t1-ptr))) ; @t1
+                                             (a-inst t1-ptr) ; @t1
                                              (c-inst true op-a op-dest-d) ; D=M
-                                             (a-inst (bit15 (i2ba (+ offset add-offset 26))))
+                                             (a-inst (+ offset add-offset 26))
                                              (c-inst false op-d op-dest-null op-jeq) ; jump if q=0
-                                             (a-inst (bit15 (i2ba t1-ptr))) ; @t1
+                                             (a-inst t1-ptr) ; @t1
                                              (c-inst true op-a op-dest-d) ; D=M ; D=q
-                                             (a-inst (bit15 (i2ba 48))) ; @48 ; ascii digit
+                                             (a-inst 48)    ; @48 ; ascii digit
                                              (c-inst op-d+a op-dest-d) ; D=D+A
                                              (a-inst console-idx) ; @console
                                              (c-inst op-d op-dest-m) ; M=D
                                              ; print first digit
-                                             (a-inst (bit15 (i2ba t0-ptr))) ; @t0
+                                             (a-inst t0-ptr) ; @t0
                                              (c-inst true op-a op-dest-d) ; D=M ; D=r
-                                             (a-inst (bit15 (i2ba 48))) ; @48
+                                             (a-inst 48)    ; @48
                                              (c-inst op-d+a op-dest-d) ; D=D+A
                                              (a-inst console-idx) ; @console
                                              (c-inst op-d op-dest-m) ; M=D
-                                             (a-inst (bit15 (i2ba 10))) ; @10 ; lf
+                                             (a-inst 10)    ; @10 ; lf
                                              (c-inst op-a op-dest-d) ; D=A
                                              (a-inst console-idx) ; @console
                                              (c-inst op-d op-dest-m) ; M=D
@@ -266,7 +266,7 @@
                                                    #(concat %1 %2)
                                                    (map
                                                      (fn [c]
-                                                       [(a-inst (bit15 (i2ba (int c)))) ; @char
+                                                       [(a-inst (int c)) ; @char
                                                         (c-inst false op-a op-dest-d) ; D=A
                                                         (a-inst console-idx) ; @console
                                                         (c-inst true op-d op-dest-m) ; M=D
@@ -300,12 +300,12 @@
     [(vec (concat
             op-init
             op-cond
-            [(a-inst (bit15 (i2ba (+ offset c-op-init c-op-cond 2 c-op-body c-op-loop 2)))) ; @ the end of the loop
+            [(a-inst (+ offset c-op-init c-op-cond 2 c-op-body c-op-loop 2)) ; @ the end of the loop
              (c-inst false op-d op-dest-null op-jeq)        ; D,JEQ ; if cond=false jump
              ]
             op-body
             op-loop
-            [(a-inst (bit15 (i2ba (+ offset c-op-init))))   ; @cond
+            [(a-inst (+ offset c-op-init))                  ; @cond
              (c-inst false op-0 op-dest-null op-jmp)        ; JMP
              ]))
      var]))
@@ -315,25 +315,25 @@
         {cond :cond then :then else :else} code
         [op-cond] (-compile cond var)
         c-op-cond (count op-cond)
-        [op-then] (-compile then (merge var {:offset (+ offset c-op-cond 2)}))
+        [op-then] (-compile then (assoc var :offset (+ offset c-op-cond 2)))
         c-op-then (count op-then)
-        [op-else] (-compile else (merge var {:offset (+ offset c-op-cond c-op-then 4)}))
+        [op-else] (-compile else (assoc var :offset (+ offset c-op-cond c-op-then 4)))
         c-op-else (count op-else)
         ]
     [(vec (concat
             op-cond
-            [(a-inst (bit15 (i2ba (+ offset c-op-cond 2 c-op-then 2)))) ; A = offset + len(op-cond) + 2 +len(op-then) + 2
+            [(a-inst (+ offset c-op-cond 2 c-op-then 2))    ; A = offset + len(op-cond) + 2 +len(op-then) + 2
              (c-inst false op-d op-dest-null op-jeq)        ; D,JNE ; if cond = false jump to op-else
              ]
             op-then
-            [(a-inst (bit15 (i2ba (+ offset c-op-cond 2 c-op-then 2 c-op-else)))) ; A = offset + len(op-cond) + 2 + len(op-then) + 2 + len(op-else)
+            [(a-inst (+ offset c-op-cond 2 c-op-then 2 c-op-else)) ; A = offset + len(op-cond) + 2 + len(op-then) + 2 + len(op-else)
              (c-inst false op-0 op-dest-null op-jmp)]       ; D,JMP ; jump to last
             op-else
             ))
      var]))
 
 (defn increment-offset [[code var]]
-  [code (merge var {:offset (+ (:offset var) (count code))})])
+  [code (assoc var :offset (+ (:offset var) (count code)))])
 
 (defn -compile [code var]
   "var - Variable table

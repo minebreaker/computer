@@ -30,11 +30,11 @@
     (let [
           cpu (make-cpu)
           _ (cpu (a-inst one15) false16 false)              ; @1
-          _ (cpu (c-inst false op-a op-dest-d op-no-jump) false16 false) ; D=A
+          _ (cpu (c-inst op-a op-dest-d) false16 false)     ; D=A
           _ (cpu (a-inst two15) false16 false)              ; @2
-          [outM1] (cpu (c-inst false op-d+a op-dest-d op-no-jump) false16 false) ; D=D+A
-          [outM2] (cpu (c-inst false op-d-1 op-dest-d op-no-jump) false16 false) ; D=D-1
-          [outM3] (cpu (c-inst false op--1 op-dest-d op-no-jump) false16 false) ; D=-1
+          [outM1] (cpu (c-inst op-d+a op-dest-d) false16 false) ; D=D+A
+          [outM2] (cpu (c-inst op-d-1 op-dest-d) false16 false) ; D=D-1
+          [outM3] (cpu (c-inst op--1 op-dest-d) false16 false) ; D=-1
           ]
       (is (= three16 outM1))
       (is (= two16 outM2))
@@ -74,7 +74,7 @@
     (let [
           cpu (make-cpu)
           [_ _ _ pc1] (cpu (a-inst one15) false16 false)    ; @1
-          [_ _ _ pc2] (cpu (a-inst (bit15 (i2ba 10))) false16 false) ; @10
+          [_ _ _ pc2] (cpu (a-inst 10) false16 false)       ; @10
           [_ _ _ pc3] (cpu (c-inst false op--1 op-dest-d op-no-jump) false16 false) ; D=-1
           [_ _ _ pc4] (cpu (c-inst false op-d op-dest-null op-jgt) false16 false) ; D,JGT ; false
           [_ _ _ pc5] (cpu (c-inst false op-d op-dest-null op-jeq) false16 false) ; D,JEQ ; false
