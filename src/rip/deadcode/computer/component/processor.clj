@@ -52,13 +52,12 @@
 
         pc-load (and3
                   instruction-type                          ; not an a-instruction
-                  (or
+                  (or4
                     (and3 j1 j2 j3)                         ; 1 1 1; just jump
-                    (or3
-                      (and j1 ng)                           ; j1 is true and output < 0
-                      (and j2 zr)                           ; j2 is true and output is 0
-                      (and j3 (not (or ng zr)))             ; j3 is true and output > 0
-                      ))
+                    (and j1 ng)                             ; j1 is true and output < 0
+                    (and j2 zr)                             ; j2 is true and output is 0
+                    (and j3 (not (or ng zr)))               ; j3 is true and output > 0
+                    )
                   (not disable-loading))                    ; not disabled
         pc-inc (not (or pc-load disable-loading))           ; neither load nor disabled
         pc-out (pc a-current pc-inc pc-load reset)
