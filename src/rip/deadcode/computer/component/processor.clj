@@ -40,8 +40,7 @@
         [outM zr ng] (alu
                        d-current
                        (mux16bit a-current inM a)           ; if comp-a == true inM else A-register
-                       c1 c2 c3 c4 c5 c6
-                       e)
+                       c1 c2 c3 c4 c5 c6)
 
 
         _ (a-register

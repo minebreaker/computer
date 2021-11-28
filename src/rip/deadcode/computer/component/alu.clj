@@ -40,7 +40,7 @@
   (let [[result] (adder16bit in [true false false false false false false false false false false false false false false false] false)]
     result))
 
-(defn alu [x y zx nx zy ny f no rs]
+(defn alu [x y zx nx zy ny f no]
   "
   ALU taken from *The Elements of Computing Systems*
   x 16bit input 1
